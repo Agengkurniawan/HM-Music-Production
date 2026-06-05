@@ -1,0 +1,301 @@
+$setting-surface: #ffffff;
+$setting-text: #151824;
+$setting-muted: #6b7280;
+$setting-border: #e6eaf2;
+$setting-soft: #f8fafc;
+$setting-blue: #2563eb;
+$setting-violet: #7c3aed;
+$setting-teal: #0f766e;
+$setting-amber: #f59e0b;
+$setting-shadow: 0 18px 45px rgba(19, 24, 38, 0.08);
+
+.admin-setting {
+    padding: 10px 25px 15px 10px;
+    color: $setting-text;
+}
+
+.setting-alert {
+    margin-bottom: 14px;
+    padding: 13px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+
+    &--success {
+        border: 1px solid #bbf7d0;
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    &--error {
+        border: 1px solid #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+    }
+}
+
+.admin-setting__header {
+    margin-bottom: 18px;
+    padding: 18px 18px;
+    border-radius: 16px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(124, 58, 237, 0.12),
+            rgba(37, 99, 235, 0.08)
+        ),
+        rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(230, 234, 242, 0.9);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+
+    h1 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        font-weight: 900;
+        color: $setting-text;
+    }
+
+    p {
+        margin: 6px 0 0;
+        color: $setting-muted;
+        font-size: 13.5px;
+        line-height: 1.5;
+        font-weight: 700;
+    }
+}
+
+.setting-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.setting-card {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    padding: 20px;
+    overflow: hidden;
+    border: 1px solid $setting-border;
+    border-radius: 14px;
+    background:
+        radial-gradient(
+            1200px 400px at -10% 0%,
+            rgba(124, 58, 237, 0.08),
+            transparent 55%
+        ),
+        rgba(255, 255, 255, 0.96);
+    box-shadow: $setting-shadow;
+
+    position: relative;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(
+            180deg,
+            rgba(37, 99, 235, 0.9),
+            rgba(124, 58, 237, 0.9)
+        );
+        opacity: 0.35;
+    }
+
+    &--wide {
+        grid-column: span 2;
+    }
+
+    &__header {
+        padding-bottom: 14px;
+        border-bottom: 1px solid $setting-border;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        h2 {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.25;
+            font-weight: 950;
+            color: $setting-text;
+        }
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.14),
+            rgba(124, 58, 237, 0.1)
+        );
+        border: 1px solid rgba(230, 234, 242, 0.9);
+        color: #0f172a;
+        font-weight: 900;
+        font-size: 12px;
+        letter-spacing: 0.01em;
+
+        svg {
+            width: 18px;
+            height: 18px;
+            color: $setting-blue;
+        }
+    }
+
+    label {
+        display: grid;
+        gap: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 900;
+
+        small {
+            color: $setting-muted;
+            font-size: 12px;
+            font-weight: 800;
+        }
+    }
+
+    input,
+    select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid $setting-border;
+        border-radius: 8px;
+        background: $setting-soft;
+        color: $setting-text;
+        font: inherit;
+        outline: none;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background 0.2s ease;
+
+        &:focus {
+            border-color: $setting-blue;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+    }
+
+    input,
+    select {
+        padding: 0 12px;
+    }
+
+    input[type="file"] {
+        min-height: 54px;
+        padding: 14px;
+        border-style: dashed;
+        background: linear-gradient(180deg, #f8fbff, #ffffff);
+        cursor: pointer;
+        color: #0f172a;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+        cursor: pointer;
+    }
+
+    &__split {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+.setting-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.btn {
+    appearance: none;
+    border: 1px solid $setting-border;
+    border-radius: 12px;
+    padding: 12px 16px;
+    min-height: 44px;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.btn--primary {
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 1),
+        rgba(124, 58, 237, 1)
+    );
+    border-color: rgba(37, 99, 235, 0.45);
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px rgba(37, 99, 235, 0.22);
+    }
+}
+
+.btn--ghost {
+    background: rgba(248, 250, 252, 0.9);
+    color: #0f172a;
+
+    &:hover {
+        transform: translateY(-1px);
+        background: #ffffff;
+        border-color: rgba(37, 99, 235, 0.35);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    }
+}
+
+@media (max-width: 920px) {
+    .setting-actions {
+        justify-content: stretch;
+    }
+
+    .btn {
+        flex: 1;
+        width: 100%;
+    }
+
+    .admin-setting {
+        padding: 18px 0;
+
+        &__header {
+            flex-direction: column;
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+
+        &__primary {
+            width: 100%;
+        }
+    }
+
+    .setting-grid,
+    .setting-card__split {
+        grid-template-columns: 1fr;
+    }
+
+    .setting-card--wide {
+        grid-column: auto;
+    }
+}

@@ -1,0 +1,43 @@
+@use "auth/login";
+
+// components
+@use "components/sidebar";
+@use "components/admin-sidebar";
+
+@use "components/modal";
+@use "components/header";
+@use "components/admin-header";
+
+// customer
+@use "layouts/customer/dashboard";
+@use "layouts/customer/demo";
+@use "layouts/customer/stylesampling";
+@use "layouts/customer/subcription";
+
+// admin
+@use "layouts/admin/admin-dashboard";
+@use "layouts/admin/admin-demo";
+@use "layouts/admin/admin-stylesampling";
+@use "layouts/admin/admin-sampling-requests";
+@use "layouts/admin/admin-downloadsales";
+@use "layouts/admin/admin-usermanagement";
+@use "layouts/admin/admin-setting";
+@use "layouts/admin/admin-subcription";
+@use "layouts/admin/admin-datatables";
+
+@import url("https://fonts.cdnfonts.com/css/outfit");
+
+@import url("https://fonts.cdnfonts.com/css/roboto");
+
+$font-family: "Roboto", sans-serif;
+
+html,
+body {
+    margin: 0;
+    background-color: #ebebeb;
+    font-family: $font-family;
+}
+
+h1 {
+    margin: 0;
+}

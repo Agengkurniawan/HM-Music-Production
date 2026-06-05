@@ -1,0 +1,570 @@
+@use "sass:color";
+
+$modal-font-family: "Roboto", sans-serif;
+$modal-text: #151824;
+$modal-muted: #64748b;
+$modal-border: #8f8d8d;
+$modal-soft: #f8fafc;
+$modal-blue: #2563eb;
+$modal-teal: #0f766e;
+$modal-amber: #f59e0b;
+$modal-rose: #d81942;
+$modal-violet: #7c3aed;
+$modal-pink: #ec4899;
+$modal-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+
+@mixin modal-gradient-top(
+    $first: $modal-blue,
+    $second: $modal-teal,
+    $third: $modal-amber
+) {
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 5px;
+        background: linear-gradient(90deg, $first, $second, $third);
+        padding: 3px;
+    }
+}
+
+@mixin modal-field($focus-color: $modal-blue) {
+    width: 100%;
+    border: 1px solid $modal-border;
+    border-radius: 8px;
+    background: $modal-soft;
+    color: $modal-text;
+    font: inherit;
+    outline: 0;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+    &:focus {
+        border-color: $focus-color;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba($focus-color, 0.12);
+    }
+}
+
+@mixin modal-submit-button($background-color) {
+    background: $background-color;
+    box-shadow: 0 12px 24px rgba($background-color, 0.18);
+
+    &:hover {
+        background: color.scale($background-color, $lightness: -5%);
+        box-shadow: 0 14px 28px rgba($background-color, 0.2);
+    }
+}
+
+// Modal: wrapper .modal.fade dan surface utama
+.modal.fade {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    .modal-content {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid $modal-border;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: $modal-shadow;
+        font-family: $modal-font-family;
+        @include modal-gradient-top;
+
+        > * {
+            position: relative;
+            z-index: 1;
+        }
+        .modal-header {
+            align-items: flex-start;
+            gap: 16px;
+            padding: 24px 24px 16px;
+            border: 0;
+
+            > div {
+                min-width: 0;
+            }
+
+            .btn-close {
+                flex: 0 0 auto;
+                border-radius: 8px;
+            }
+
+            .modal-title {
+                margin: 4px 0 0;
+                color: $modal-text;
+                font-size: 22px;
+                font-weight: 900;
+                line-height: 1.2;
+            }
+        }
+        .modal-eyebrow {
+            display: block;
+            color: $modal-teal;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        // Modal: body standar
+        .modal-body {
+            display: grid;
+            gap: 16px;
+            padding: 20px 24px 24px;
+
+            > label,
+            .modal-grid > label {
+                display: grid;
+                gap: 8px;
+                margin: 0;
+                color: #334155;
+                font-size: 13px;
+                font-weight: 900;
+                height: fit-content;
+            }
+
+            input,
+            select,
+            textarea {
+                @include modal-field;
+                height: 43px;
+            }
+
+            input,
+            select {
+                min-height: 44px;
+                padding: 0 12px;
+            }
+
+            input[type="file"] {
+                min-height: auto;
+                padding: 11px;
+                background: #ffffff;
+            }
+
+            textarea {
+                min-height: 96px;
+                padding: 12px;
+                resize: vertical;
+            }
+            // Modal: helper body grid
+            .modal-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+            // Modal: helper upload/dropzone
+            .modal-dropzone {
+                position: relative;
+                place-items: center;
+                min-height: 168px;
+                padding: 24px;
+                overflow: hidden;
+                border: 1px dashed rgba($modal-blue, 0.45);
+                border-radius: 8px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba($modal-blue, 0.08),
+                        rgba($modal-teal, 0.08)
+                    ),
+                    #f8fbff;
+                text-align: center;
+                cursor: pointer;
+                transition:
+                    border-color 0.2s ease,
+                    transform 0.2s ease,
+                    background 0.2s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    border-color: $modal-blue;
+                    background:
+                        linear-gradient(
+                            135deg,
+                            rgba($modal-blue, 0.12),
+                            rgba($modal-teal, 0.1)
+                        ),
+                        #ffffff;
+                }
+
+                input {
+                    display: none;
+                }
+
+                svg {
+                    width: 40px;
+                    height: 40px;
+                    padding: 8px;
+                    border-radius: 8px;
+                    background: #ffffff;
+                    color: $modal-blue;
+                    fill: none;
+                    stroke: currentColor;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    stroke-width: 2;
+                    box-shadow: 0 12px 24px rgba($modal-blue, 0.14);
+                }
+
+                strong {
+                    max-width: 100%;
+                    overflow-wrap: anywhere;
+                    color: $modal-text;
+                    font-size: 17px;
+                }
+
+                span {
+                    max-width: 260px;
+                    color: $modal-muted;
+                    font-size: 13px;
+                    font-weight: 700;
+                    line-height: 1.45;
+                }
+            }
+            .modal-summary {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+
+                div {
+                    padding: 16px;
+                    border: 1px solid #dbeafe;
+                    border-radius: 8px;
+                    background: #eff6ff;
+                }
+
+                span,
+                strong {
+                    display: block;
+                }
+
+                span {
+                    color: #1d4ed8;
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                strong {
+                    margin-top: 5px;
+                    color: $modal-text;
+                    font-size: 20px;
+                    font-weight: 900;
+                }
+            }
+
+            .modal-section {
+                span {
+                    color: $modal-blue;
+                    font-size: 12px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+
+                h3 {
+                    margin: 4px 0 0;
+                    color: $modal-text;
+                    font-size: 22px;
+                    font-weight: 900;
+                }
+            }
+            // Modal: helper toggle
+            .modal-toggle {
+                display: flex !important;
+                align-items: center;
+                gap: 11px !important;
+                min-height: 48px;
+                padding: 11px 12px;
+                border: 1px solid $modal-border;
+                border-radius: 8px;
+                background: $modal-soft;
+                cursor: pointer;
+
+                input {
+                    display: none;
+                }
+
+                span {
+                    position: relative;
+                    width: 44px;
+                    height: 26px;
+                    flex: 0 0 44px;
+                    border-radius: 999px;
+                    background: #cbd5e1;
+                    transition: background 0.2s ease;
+
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        top: 4px;
+                        left: 4px;
+                        width: 18px;
+                        height: 18px;
+                        border-radius: 50%;
+                        background: #ffffff;
+                        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.16);
+                        transition: transform 0.2s ease;
+                    }
+                }
+
+                input:checked + span {
+                    background: $modal-amber;
+
+                    &::after {
+                        transform: translateX(18px);
+                    }
+                }
+            }
+        }
+
+        // Modal: footer standar
+        .modal-footer {
+            gap: 10px;
+            width: 100%;
+            display: grid;
+            padding: 10px 24px;
+            grid-template-columns: 1fr 1fr;
+
+            button {
+                width: 100%;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 900;
+                padding: 12px;
+
+                cursor: pointer;
+
+                &:first-child {
+                    border: 1px solid $modal-border;
+                    background: #ffffff;
+                    color: $modal-text;
+                    margin: 0 !important;
+                }
+
+                &:last-child {
+                    border: 0;
+                    @include modal-submit-button($modal-blue);
+                    color: #ffffff;
+                }
+
+                &:hover {
+                    &:first-child {
+                        background: #7d7d7d;
+                        color: #ffffff;
+                    }
+                }
+            }
+        }
+    }
+
+    .solid {
+        margin: 0;
+        stroke: var(--Neutral-01, #e7e8e9);
+        stroke-width: 1px;
+    }
+    hr {
+        border-top: 2px solid $modal-border;
+        width: 90%;
+        margin: 0 auto;
+    }
+    // Modal: form container
+    .modal-form {
+        display: grid;
+        margin: 0;
+    }
+}
+// Modal: subscription payment
+#subscriptionPaymentModal {
+    .modal-content {
+        @include modal-gradient-top($modal-violet, $modal-blue, $modal-pink);
+    }
+
+    .modal-eyebrow {
+        color: $modal-violet;
+    }
+
+    .modal-body input,
+    .modal-body select {
+        @include modal-field($modal-blue);
+
+        border-color: #c7c7c7;
+
+        &:hover {
+            border-color: #000000;
+        }
+
+        &:focus {
+            border-color: $modal-blue;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba($modal-blue, 0.1);
+        }
+    }
+
+    .modal-body .ts-wrapper {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .modal-footer button:last-child {
+        background: linear-gradient(135deg, $modal-violet, $modal-pink);
+        box-shadow: 0 14px 28px rgba($modal-violet, 0.2);
+    }
+}
+
+#uploadStyleModal {
+    .modal-dialog {
+        max-width: 600px;
+    }
+}
+
+// Modal: helper pesan dan konteks
+.modal-alert {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 8px;
+
+    p {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.4;
+    }
+
+    &--danger {
+        border: 1px solid #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+    }
+}
+
+.modal-warning {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px;
+    border: 1px solid rgba($modal-rose, 0.18);
+    border-radius: 8px;
+    background: rgba($modal-rose, 0.06);
+
+    svg {
+        width: 44px;
+        height: 44px;
+        padding: 10px;
+        border-radius: 8px;
+        background: #ffffff;
+        color: $modal-rose;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+    }
+
+    strong {
+        display: block;
+        color: $modal-text;
+        font-size: 16px;
+        font-weight: 950;
+    }
+
+    p {
+        margin: 5px 0 0;
+        color: $modal-muted;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+}
+
+// Modal: variasi submit danger dan delivery
+.modal-form--danger {
+    .modal-footer button:last-child {
+        @include modal-submit-button($modal-rose);
+    }
+}
+
+.modal-form--delivery {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    .modal-body {
+        input,
+        select,
+        textarea {
+            @include modal-field($modal-teal);
+            background: #ffffff;
+        }
+    }
+
+    .modal-footer button:last-child {
+        @include modal-submit-button($modal-teal);
+    }
+}
+
+.modal-file span {
+    color: $modal-muted;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.modal-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: #eff6ff;
+
+    span,
+    strong {
+        display: block;
+    }
+
+    span {
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    strong {
+        margin-top: 4px;
+        color: $modal-text;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    p {
+        max-width: 360px;
+        margin: 0;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+}
+
+// Modal: responsive
+@media (max-width: 700px) {
+    .modal-grid,
+    .modal-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .modal-note {
+        display: grid;
+    }
+}

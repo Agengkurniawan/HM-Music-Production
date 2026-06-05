@@ -1,0 +1,522 @@
+$sub-admin-surface: #ffffff;
+$sub-admin-text: #151824;
+$sub-admin-muted: #64748b;
+$sub-admin-border: #c7c7c7;
+$sub-admin-soft: #f8fafc;
+$sub-admin-blue: #2563eb;
+$sub-admin-teal: #0f766e;
+$sub-admin-amber: #d97706;
+$sub-admin-green: #15803d;
+$sub-admin-red: #be123c;
+$sub-admin-violet: #7c3aed;
+$sub-admin-shadow: 0 18px 45px rgba(19, 24, 38, 0.08);
+$sub-admin-hover-shadow: 0 24px 60px rgba(19, 24, 38, 0.12);
+
+.admin-subscription {
+    display: grid;
+    gap: 18px;
+    padding: 10px 25px 20px 10px;
+    color: $sub-admin-text;
+}
+
+.subscription-alert {
+    padding: 13px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+
+    &--success {
+        border: 1px solid #bbf7d0;
+        background: #f0fdf4;
+        color: $sub-admin-green;
+    }
+
+    &--error {
+        border: 1px solid #fecdd3;
+        background: #fff1f2;
+        color: $sub-admin-red;
+    }
+}
+
+.subscription-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+
+    article {
+        --summary-color: #{$sub-admin-blue};
+        --summary-soft: rgba(37, 99, 235, 0.1);
+
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        min-height: 116px;
+        padding: 18px;
+        overflow: hidden;
+        border: 1px solid $sub-admin-border;
+        border-radius: 8px;
+        background:
+            linear-gradient(180deg, var(--summary-soft), rgba(255, 255, 255, 0) 58%),
+            $sub-admin-surface;
+        box-shadow: $sub-admin-shadow;
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: var(--summary-color);
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            right: -32px;
+            bottom: -44px;
+            width: 112px;
+            height: 112px;
+            border-radius: 50%;
+            background: var(--summary-soft);
+        }
+
+        &:hover {
+            transform: translateY(-3px);
+            border-color: rgba(37, 99, 235, 0.22);
+            box-shadow: $sub-admin-hover-shadow;
+        }
+
+        &:nth-child(2) {
+            --summary-color: #{$sub-admin-teal};
+            --summary-soft: rgba(15, 118, 110, 0.1);
+        }
+
+        &:nth-child(3) {
+            --summary-color: #{$sub-admin-amber};
+            --summary-soft: rgba(245, 158, 11, 0.12);
+        }
+
+        &:nth-child(4) {
+            --summary-color: #{$sub-admin-red};
+            --summary-soft: rgba(225, 29, 72, 0.09);
+        }
+    }
+
+    span,
+    strong,
+    small,
+    &__body,
+    &__icon {
+        position: relative;
+        z-index: 1;
+    }
+
+    &__body {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    &__icon {
+        display: grid;
+        place-items: center;
+        width: 50px;
+        height: 50px;
+        flex: 0 0 50px;
+        border-radius: 8px;
+        background: var(--summary-color);
+        color: #ffffff;
+
+        svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    }
+
+    span,
+    strong,
+    small {
+        display: block;
+        min-width: 0;
+    }
+
+    span {
+        color: $sub-admin-muted;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    strong {
+        color: $sub-admin-text;
+        font-size: 30px;
+        font-weight: 950;
+        line-height: 1.05;
+        overflow-wrap: anywhere;
+    }
+
+    small {
+        overflow: hidden;
+        color: $sub-admin-muted;
+        font-size: 12px;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.subscription-panel {
+    min-width: 0;
+    padding: 18px;
+    overflow: hidden;
+    border: 1px solid $sub-admin-border;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: $sub-admin-shadow;
+
+    &__toolbar {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) 190px;
+        gap: 12px;
+        margin-bottom: 16px;
+
+        input,
+        select {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid $sub-admin-border;
+            border-radius: 8px;
+            background: $sub-admin-soft;
+            color: $sub-admin-text;
+            font: inherit;
+            outline: 0;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+
+            &:hover {
+                border-color: #000000;
+            }
+
+            &:focus {
+                border-color: $sub-admin-blue;
+                background: #ffffff;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+            }
+        }
+
+        select {
+            padding: 0 12px;
+        }
+
+        .ts-wrapper {
+            min-width: 0;
+        }
+    }
+}
+
+.subscription-search {
+    position: relative;
+    min-width: 0;
+
+    svg {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        width: 18px;
+        height: 18px;
+        color: $sub-admin-muted;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        transform: translateY(-50%);
+    }
+
+    input {
+        padding: 0 12px 0 38px;
+    }
+}
+
+.subscription-table {
+    --admin-table-min-width: 1120px;
+
+    thead th {
+        &:nth-child(1) {
+            width: 230px;
+        }
+
+        &:nth-child(2) {
+            width: 150px;
+        }
+
+        &:nth-child(3) {
+            width: 240px;
+        }
+
+        &:nth-child(4),
+        &:nth-child(5) {
+            width: 150px;
+        }
+
+        &:nth-child(6) {
+            width: 150px;
+        }
+
+        &:nth-child(7) {
+            width: 170px;
+            text-align: right;
+        }
+    }
+
+    tbody {
+        tr {
+            transition:
+                background 0.2s ease,
+                box-shadow 0.2s ease;
+
+            &:hover {
+                background: #fbfcff;
+
+                .subscription-row__user > div {
+                    background: $sub-admin-blue;
+                    color: #ffffff;
+                }
+            }
+        }
+
+        td:last-child {
+            text-align: right;
+        }
+    }
+}
+
+.subscription-row {
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+
+        > div {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            border-radius: 8px;
+            background: #eef2ff;
+            color: $sub-admin-violet;
+            font-weight: 900;
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        span {
+            display: grid;
+            gap: 5px;
+            min-width: 0;
+        }
+    }
+
+    &__payment {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    &__date {
+        min-width: 0;
+    }
+
+    &__package,
+    &__user strong,
+    &__user small,
+    &__payment strong,
+    &__payment span,
+    &__payment small,
+    &__date span,
+    &__date small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__package,
+    &__user strong,
+    &__payment strong {
+        color: $sub-admin-text;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    &__user small,
+    &__payment span,
+    &__payment small,
+    &__date,
+    &__date small {
+        color: $sub-admin-muted;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    &__date span {
+        display: block;
+        color: $sub-admin-text;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    &__date small {
+        display: block;
+        margin-top: 4px;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 0;
+
+        form {
+            margin: 0;
+        }
+
+        button,
+        .subscription-row__idle {
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 11px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        button {
+            cursor: pointer;
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease,
+                color 0.2s ease;
+
+            &:hover {
+                transform: translateY(-1px);
+            }
+        }
+    }
+
+    &__idle {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: $sub-admin-muted;
+    }
+
+    &__renew {
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+
+        &:hover {
+            border-color: #93c5fd;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    }
+
+    &__suspend {
+        border: 1px solid #fecdd3;
+        background: #fff1f2;
+        color: $sub-admin-red;
+
+        &:hover {
+            border-color: #fda4af;
+            background: #ffe4e6;
+            color: #9f1239;
+        }
+    }
+}
+
+.subscription-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    min-width: 104px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+
+    &--active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    &--pending-payment {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    &--expiring-soon {
+        background: #fff7ed;
+        color: $sub-admin-amber;
+    }
+
+    &--expired {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    &--cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+}
+
+@media (max-width: 980px) {
+    .subscription-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .subscription-panel {
+        &__toolbar {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-subscription {
+        padding: 0;
+    }
+
+    .subscription-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .subscription-panel {
+        padding: 14px;
+    }
+
+    .subscription-summary article {
+        min-height: 104px;
+    }
+}
