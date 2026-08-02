@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Notifications\StyleCatalogUpdated;
 use App\Models\StyleSampling;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
@@ -64,6 +67,8 @@ class StyleSamplingController extends Controller
 
         $styleSampling->save();
 
+        $this->notifyCustomersAboutStyle($styleSampling, 'added');
+
         return back()->with('success', 'Style uploaded successfully.');
     }
 
@@ -76,6 +81,8 @@ class StyleSamplingController extends Controller
         ]);
 
         $styleSampling->update($validated);
+
+        $this->notifyCustomersAboutStyle($styleSampling, 'updated');
 
         return back()->with('success', 'Style sampling updated successfully.');
     }
@@ -98,7 +105,12 @@ class StyleSamplingController extends Controller
             ]);
         }
 
+        $wasPublished = $styleSampling->status === 'Published';
         $styleSampling->update(['status' => 'Published']);
+
+        if (! $wasPublished) {
+            $this->notifyCustomersAboutStyle($styleSampling, 'added');
+        }
 
         return back()->with('success', 'Style sampling activated.');
     }
@@ -133,5 +145,20 @@ class StyleSamplingController extends Controller
         }
 
         return round($bytes / 1024 / 1024, 1).' MB';
+    }
+
+    private function notifyCustomersAboutStyle(StyleSampling $styleSampling, string $action): void
+    {
+        if ($styleSampling->status !== 'Published') {
+            return;
+        }
+
+        User::query()
+            ->where('role', 'customer')
+            ->where('status', '<>', 'Suspended')
+            ->whereNotNull('email')
+            ->chunkById(100, function ($customers) use ($styleSampling, $action): void {
+                Notification::send($customers, new StyleCatalogUpdated($styleSampling, $action));
+            });
     }
 }

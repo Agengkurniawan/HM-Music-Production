@@ -63,7 +63,7 @@ class StyleSamplingController extends Controller
             }
         }
 
-        $samplingRequests = SamplingRequest::with('styleSampling')
+        $samplingRequests = SamplingRequest::with(['styleSampling', 'payment'])
             ->where('user_id', Auth::id())
             ->latest();
 

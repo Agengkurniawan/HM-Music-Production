@@ -15,8 +15,8 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $trendingSongs = MusicDemo::query()
-            ->withYoutubeVideo()
-            ->whereIn('genre', MusicDemo::GENRES)
+            ->withPlayableMedia()
+            ->whereIn('genre', MusicDemo::genreOptions())
             ->orderByDesc('is_trending')
             ->orderByDesc('plays_count')
             ->take(4)
@@ -27,7 +27,7 @@ class AdminDashboardController extends Controller
                 'title' => $demo->title,
                 'artist' => 'HM Studio',
                 'plays' => number_format($demo->plays_count),
-                'revenue' => $demo->is_trending ? 'Trending' : 'YouTube',
+                'revenue' => $demo->is_trending ? 'Trending' : ($demo->youtube_video_id ? 'YouTube' : 'MP4'),
             ]);
         $topTrendingSong = $trendingSongs->first();
 
@@ -40,7 +40,7 @@ class AdminDashboardController extends Controller
             })
             ->count();
         $totalDownloads = DownloadSale::where('status', 'Completed')->count();
-        $totalDemoPlays = MusicDemo::whereIn('genre', MusicDemo::GENRES)->sum('plays_count');
+        $totalDemoPlays = MusicDemo::whereIn('genre', MusicDemo::genreOptions())->sum('plays_count');
         $monthlyRevenue = Payment::where('status', 'Completed')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -106,7 +106,7 @@ class AdminDashboardController extends Controller
             'downloadData' => $downloadData,
             'weeklyDownloadTotal' => number_format(collect($downloadData)->sum('raw')).' downloads',
             'demoPlays' => $demoPlays,
-            'demoPlayTotal' => number_format(MusicDemo::whereIn('genre', MusicDemo::GENRES)->sum('plays_count')).' plays',
+            'demoPlayTotal' => number_format(MusicDemo::whereIn('genre', MusicDemo::genreOptions())->sum('plays_count')).' plays',
             'topTrendingSong' => $topTrendingSong,
             'trendingSongs' => $trendingSongs,
         ]);
@@ -152,8 +152,8 @@ class AdminDashboardController extends Controller
 
     private function demoPerformance(): array
     {
-        $demos = MusicDemo::whereIn('genre', MusicDemo::GENRES)
-            ->withYoutubeVideo()
+        $demos = MusicDemo::whereIn('genre', MusicDemo::genreOptions())
+            ->withPlayableMedia()
             ->orderByDesc('plays_count')
             ->take(5)
             ->get();
@@ -162,7 +162,7 @@ class AdminDashboardController extends Controller
         return $demos
             ->map(fn (MusicDemo $demo): array => [
                 'title' => $demo->title,
-                'genre' => $demo->genre,
+                'genre' => $demo->display_genre,
                 'plays' => number_format($demo->plays_count),
                 'percent' => max(4, (int) round(($demo->plays_count / $maxPlays) * 100)),
             ])

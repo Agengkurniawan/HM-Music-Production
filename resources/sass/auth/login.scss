@@ -1,64 +1,96 @@
-$login-ink: #111827;
-$login-charcoal: #1f232c;
+$login-ink: #151824;
+$login-charcoal: #111827;
 $login-paper: #ffffff;
-$login-soft: #f5f7fb;
-$login-muted: #6f7785;
-$login-line: #dce3ec;
-$login-blue: #2f80ed;
-$login-teal: #1b998b;
-$login-coral: #ee6f57;
-$login-yellow: #f9c74f;
-$login-danger: #d92d44;
-$login-success: #127a43;
+$login-muted: #6b7280;
+$login-line: #e6eaf2;
+$login-blue: #2563eb;
+$login-violet: #9333ea;
+$login-pink: #ec4899;
+$login-teal: #0f766e;
+$login-amber: #f59e0b;
+$login-danger: #e11d48;
+$login-success: #15803d;
 
 .login-page {
     position: relative;
+    box-sizing: border-box;
+    height: 100vh;
+    height: 100dvh;
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
-    overflow: hidden;
-    padding: 40px 20px;
+    overflow: auto;
+    padding: clamp(12px, 3vh, 32px) 20px;
     color: $login-ink;
     background:
-        linear-gradient(90deg, rgba(17, 24, 39, 0.04) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(17, 24, 39, 0.04) 1px, transparent 1px),
-        linear-gradient(135deg, #f8fafc 0%, #eef5f4 52%, #f7f3f5 100%);
-    background-size: 38px 38px, 38px 38px, auto;
+        linear-gradient(
+            135deg,
+            rgba(17, 24, 39, 0.98) 0%,
+            rgba(31, 41, 55, 0.96) 44%,
+            rgba(235, 235, 235, 0.96) 44%,
+            rgba(245, 247, 251, 0.98) 100%
+        ),
+        #ebebeb;
 
     &::before {
-        position: absolute;
-        inset: auto 0 0;
-        height: 34%;
+        position: fixed;
+        inset: 0;
+        display: block;
         content: "";
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.82));
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.075) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.065) 1px,
+                transparent 1px
+            );
+        background-size: 38px 38px;
+        mask-image: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.82),
+            transparent 60%
+        );
         pointer-events: none;
     }
 
     &__shell {
         position: relative;
         z-index: 1;
-        width: min(100%, 1120px);
+        width: min(100%, 980px);
+        height: auto;
+        max-height: none;
+        min-height: 0;
         display: grid;
-        grid-template-columns: minmax(0, 1.08fr) minmax(360px, 440px);
-        gap: 26px;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 430px);
+        gap: clamp(18px, 3vw, 28px);
         align-items: stretch;
+
+        &--compact {
+            max-height: none;
+        }
     }
 
     &__auth {
+        min-height: 0;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        gap: 22px;
-        padding: 34px;
-        border: 1px solid rgba(255, 255, 255, 0.78);
+        justify-content: flex-start;
+        gap: 18px;
+        padding: clamp(22px, 5vw, 34px);
+        border: 1px solid $login-line;
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 24px 68px rgba(31, 35, 44, 0.14);
-        backdrop-filter: blur(18px);
+        background: #ffffff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
+        backdrop-filter: none;
     }
 
     &__brand {
-        display: none;
+        display: flex;
         align-items: center;
         gap: 12px;
         color: $login-charcoal;
@@ -83,28 +115,52 @@ $login-success: #127a43;
     }
 
     &__mark {
-        width: 54px;
-        height: 54px;
+        position: relative;
+        width: 56px;
+        height: 56px;
         display: grid;
         place-items: center;
-        flex: 0 0 auto;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 8px;
-        background: $login-paper;
-        color: $login-charcoal;
-        box-shadow: 0 16px 36px rgba(17, 24, 39, 0.13);
+        flex: 0 0 56px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        z-index: 1;
 
-        svg {
-            width: 31px;
-            height: 36px;
+        &::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(0, 0, 0, 0.22) 0%,
+                rgba(0, 0, 0, 0.14) 20%,
+                rgba(0, 0, 0, 0.07) 40%,
+                rgba(0, 0, 0, 0.025) 60%,
+                transparent 78%
+            );
+            z-index: -1;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            transform: scale(1.22);
+
+            filter: contrast(1.25) brightness(0.95)
+                drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25))
+                drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18));
         }
     }
 
     &__intro {
         h1 {
-            margin: 8px 0 10px;
+            margin: 4px 0 6px;
             color: $login-ink;
-            font-size: 38px;
+            font-size: 34px;
             font-weight: 900;
             line-height: 1.08;
             letter-spacing: 0;
@@ -114,12 +170,12 @@ $login-success: #127a43;
             margin: 0;
             color: $login-muted;
             font-size: 15px;
-            line-height: 1.65;
+            line-height: 1.55;
         }
     }
 
     &__eyebrow {
-        color: $login-coral !important;
+        color: $login-violet !important;
         font-size: 12px !important;
         font-weight: 900;
         letter-spacing: 0;
@@ -128,30 +184,172 @@ $login-success: #127a43;
     }
 }
 
-.login-showcase {
+.login-hero {
     position: relative;
-    min-height: 660px;
+    min-height: 560px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
-    padding: 34px;
+    padding: clamp(28px, 4vw, 42px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 8px;
-    color: #ffffff;
     background:
-        linear-gradient(135deg, rgba(27, 153, 139, 0.14), rgba(249, 199, 79, 0.12)),
-        $login-charcoal;
-    box-shadow: 0 24px 68px rgba(31, 35, 44, 0.18);
+        linear-gradient(150deg, rgba(147, 51, 234, 0.28), transparent 42%),
+        linear-gradient(320deg, rgba(236, 72, 153, 0.2), transparent 48%),
+        #111827;
+    color: #ffffff;
+    box-shadow: 0 24px 70px rgba(17, 24, 39, 0.22);
 
     &::before {
         position: absolute;
         inset: 0;
         content: "";
         background:
-            linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-            linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.08) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.07) 1px,
+                transparent 1px
+            );
+        background-size: 42px 42px;
+        mask-image: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.9),
+            rgba(0, 0, 0, 0.24)
+        );
+        pointer-events: none;
+    }
+
+    > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    &__logo {
+        width: 126px;
+        height: 126px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+
+        img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            transform: scale(1.22);
+            filter: brightness(1.18) contrast(1.14)
+                drop-shadow(0 16px 24px rgba(243, 236, 236, 0.3))
+                drop-shadow(0 0 14px rgba(246, 246, 246, 0.12));
+        }
+    }
+
+    &__copy {
+        max-width: 430px;
+
+        span {
+            display: block;
+            margin-bottom: 12px;
+            color: #f3e8ff;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: clamp(34px, 4.8vw, 48px);
+            font-weight: 900;
+            line-height: 1.04;
+            letter-spacing: 0;
+        }
+
+        p {
+            max-width: 360px;
+            margin: 18px 0 0;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+    }
+
+    &__features {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+
+        span {
+            min-width: 0;
+            padding: 12px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-align: center;
+            white-space: nowrap;
+        }
+    }
+}
+
+.login-showcase {
+    display: none;
+    position: relative;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: clamp(22px, 3vh, 34px);
+    border-radius: 8px;
+    color: #ffffff;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(37, 99, 235, 0.18),
+            rgba(124, 58, 237, 0.2) 42%,
+            rgba(37, 99, 235, 0.16)
+        ),
+        $login-charcoal;
+    box-shadow:
+        0 28px 70px rgba(31, 35, 44, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    &::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.06) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.05) 1px,
+                transparent 1px
+            );
         background-size: 34px 34px;
-        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2));
+        mask-image: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.85),
+            rgba(0, 0, 0, 0.2)
+        );
         pointer-events: none;
     }
 
@@ -191,11 +389,11 @@ $login-success: #127a43;
 
     &__headline {
         width: min(100%, 560px);
-        margin-top: 42px;
+        margin-top: clamp(20px, 4vh, 42px);
 
         p {
             margin: 0 0 10px;
-            color: $login-yellow;
+            color: #f3e8ff;
             font-size: 13px;
             font-weight: 900;
             letter-spacing: 0;
@@ -205,33 +403,33 @@ $login-success: #127a43;
         h2 {
             margin: 0;
             color: #ffffff;
-            font-size: 48px;
+            font-size: clamp(32px, 5.2vh, 46px);
             font-weight: 900;
-            line-height: 1.05;
+            line-height: 1.06;
             letter-spacing: 0;
         }
     }
 
     &__board {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 118px;
+        grid-template-columns: minmax(0, 1fr) 132px;
         gap: 16px;
-        margin: 46px 0;
+        margin: clamp(18px, 4.2vh, 38px) 0;
     }
 
     &__session,
-    &__mixer,
+    &__stack article,
     &__stats > div {
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.08);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(12px);
     }
 
     &__session {
-        min-height: 260px;
-        padding: 20px;
+        min-height: 0;
+        padding: clamp(16px, 2.5vh, 20px);
     }
 
     &__session-top {
@@ -246,7 +444,7 @@ $login-success: #127a43;
         strong {
             padding: 7px 10px;
             border-radius: 8px;
-            background: $login-coral;
+            background: linear-gradient(135deg, $login-violet, $login-pink);
             color: #ffffff;
             font-size: 12px;
             line-height: 1;
@@ -254,19 +452,24 @@ $login-success: #127a43;
     }
 
     &__wave {
-        height: 132px;
+        height: clamp(76px, 17vh, 122px);
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         align-items: end;
         gap: 9px;
-        margin: 34px 0 22px;
+        margin: clamp(18px, 4vh, 34px) 0 clamp(14px, 3vh, 22px);
 
         span {
             min-height: 24px;
             height: var(--height);
             border-radius: 8px 8px 3px 3px;
-            background: linear-gradient(180deg, $login-yellow, $login-teal);
-            box-shadow: 0 10px 22px rgba(27, 153, 139, 0.28);
+            background: linear-gradient(
+                180deg,
+                #ffffff,
+                $login-pink 38%,
+                $login-blue
+            );
+            box-shadow: 0 10px 22px rgba(124, 58, 237, 0.24);
         }
     }
 
@@ -285,39 +488,36 @@ $login-success: #127a43;
         }
     }
 
-    &__mixer {
+    &__stack {
         display: grid;
-        gap: 14px;
-        padding: 16px;
+        gap: 12px;
 
-        div {
-            min-height: 62px;
-            display: grid;
-            grid-template-columns: 1fr 22px;
-            align-items: center;
-            gap: 10px;
+        article {
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 14px;
+        }
+
+        span,
+        strong {
+            display: block;
+            line-height: 1.2;
         }
 
         span {
-            height: 7px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.18);
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
         }
 
         strong {
-            width: 22px;
-            height: 22px;
-            border: 5px solid $login-blue;
-            border-radius: 50%;
-            background: #ffffff;
-        }
-
-        div:nth-child(2) strong {
-            border-color: $login-yellow;
-        }
-
-        div:nth-child(3) strong {
-            border-color: $login-coral;
+            margin-top: 7px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 900;
         }
     }
 
@@ -355,7 +555,7 @@ $login-success: #127a43;
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 17px;
+    gap: clamp(12px, 1.8vh, 16px);
 
     &__field {
         display: flex;
@@ -366,28 +566,28 @@ $login-success: #127a43;
         > span:first-child {
             color: $login-ink;
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 900;
         }
     }
 
     &__control {
-        min-height: 54px;
+        min-height: 52px;
         display: flex;
         align-items: center;
         gap: 11px;
         padding: 0 15px;
-        border: 1px solid $login-line;
+        border: 1px solid #d7deea;
         border-radius: 8px;
-        background: #fbfcfe;
+        background: #f8fafc;
         transition:
             background 0.2s ease,
             border-color 0.2s ease,
             box-shadow 0.2s ease;
 
         &:focus-within {
-            border-color: rgba(47, 128, 237, 0.86);
+            border-color: $login-blue;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(47, 128, 237, 0.14);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13);
         }
 
         input {
@@ -401,7 +601,7 @@ $login-success: #127a43;
             font-size: 15px;
 
             &::placeholder {
-                color: #9aa4b2;
+                color: #98a2b3;
             }
         }
 
@@ -409,7 +609,7 @@ $login-success: #127a43;
             width: 20px;
             height: 20px;
             flex: 0 0 auto;
-            fill: $login-muted;
+            fill: #7b8494;
         }
     }
 
@@ -438,11 +638,11 @@ $login-success: #127a43;
 
         &[aria-pressed="true"] {
             .login-form__eye--show {
-                display: none;
+                display: block;
             }
 
             .login-form__eye--hide {
-                display: block;
+                display: none;
             }
         }
     }
@@ -452,8 +652,12 @@ $login-success: #127a43;
         height: 20px;
         fill: currentColor;
 
-        &--hide {
+        &--show {
             display: none;
+        }
+
+        &--hide {
+            display: block;
         }
     }
 
@@ -487,6 +691,28 @@ $login-success: #127a43;
         color: $login-muted;
         font-size: 14px;
         line-height: 1.4;
+
+        a,
+        button {
+            color: $login-blue;
+            font-weight: 900;
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                color: $login-charcoal;
+                text-decoration: underline;
+                outline: 0;
+            }
+        }
+    }
+
+    &__link {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font: inherit;
+        cursor: pointer;
     }
 
     &__remember {
@@ -500,7 +726,7 @@ $login-success: #127a43;
         input {
             width: 17px;
             height: 17px;
-            accent-color: $login-teal;
+            accent-color: $login-blue;
         }
     }
 
@@ -512,12 +738,12 @@ $login-success: #127a43;
         gap: 10px;
         border: 0;
         border-radius: 8px;
-        background: $login-charcoal;
+        background: linear-gradient(135deg, $login-violet, $login-pink);
         color: #ffffff;
         font-size: 16px;
         font-weight: 900;
         cursor: pointer;
-        box-shadow: 0 15px 26px rgba(31, 35, 44, 0.18);
+        box-shadow: 0 16px 30px rgba(124, 58, 237, 0.24);
         transition:
             background 0.2s ease,
             transform 0.2s ease,
@@ -530,22 +756,58 @@ $login-success: #127a43;
         }
 
         &:hover {
-            background: #131720;
-            box-shadow: 0 18px 32px rgba(31, 35, 44, 0.22);
+            background:
+                linear-gradient(
+                    150deg,
+                    rgba(147, 51, 234, 0.28),
+                    transparent 42%
+                ),
+                linear-gradient(
+                    120deg,
+                    rgba(236, 72, 153, 0.2),
+                    transparent 48%
+                ),
+                #213258;
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.3);
             transform: translateY(-1px);
         }
 
         &:focus-visible {
-            outline: 4px solid rgba(238, 111, 87, 0.22);
+            outline: 4px solid rgba(124, 58, 237, 0.24);
             outline-offset: 2px;
         }
     }
 
+    &__divider {
+        position: relative;
+        display: grid;
+        place-items: center;
+        color: #8b95a5;
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1;
+        text-transform: uppercase;
+
+        &::before {
+            width: 100%;
+            height: 1px;
+            display: block;
+            content: "";
+            background: #e5e7eb;
+        }
+
+        span {
+            position: absolute;
+            padding: 0 10px;
+            background: #ffffff;
+        }
+    }
+
     &__register {
-        padding: 15px;
-        border: 1px solid #d8efe9;
+        padding: 0;
+        border: 0;
         border-radius: 8px;
-        background: #f4fbf8;
+        background: transparent;
         color: $login-muted;
         font-size: 14px;
         line-height: 1.5;
@@ -561,7 +823,7 @@ $login-success: #127a43;
         }
 
         a {
-            color: $login-teal;
+            color: $login-blue;
             font-weight: 900;
             text-decoration: none;
 
@@ -575,20 +837,223 @@ $login-success: #127a43;
             color: $login-muted;
             font-size: 13px;
         }
+
+        &--quiet {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+    }
+
+    &__social-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    &__google,
+    &__facebook {
+        width: 100%;
+        min-height: 44px;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 1px solid #d7deea;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #1f2937 !important;
+        font-size: 14px;
+        font-weight: 900;
+        text-decoration: none;
+        box-shadow: 0 10px 22px rgba(17, 24, 39, 0.07);
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+
+        svg {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 auto;
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-color: #aab6c7;
+            box-shadow: 0 14px 26px rgba(17, 24, 39, 0.12);
+            text-decoration: none !important;
+            transform: translateY(-1px);
+            outline: 0;
+        }
+    }
+
+    &__facebook {
+        border-color: $login-blue;
+        background: $login-blue;
+        color: #ffffff !important;
+
+        &:hover,
+        &:focus-visible {
+            border-color: #1e40af;
+            background: #1e40af;
+            color: #ffffff !important;
+        }
+    }
+
+    &__register-copy {
+        display: block;
+        padding: 13px 14px;
+        border: 1px solid #dbe4ff;
+        border-radius: 8px;
+        background: #f8faff;
+    }
+
+    &__status {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+
+        span {
+            min-width: 0;
+            padding: 8px 6px;
+            border: 1px solid rgba(220, 227, 236, 0.9);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.66);
+            color: $login-muted;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-align: center;
+            white-space: nowrap;
+        }
+    }
+}
+
+.password-reset-modal {
+    --bs-modal-width: 430px;
+
+    &__content {
+        gap: 16px;
+        padding: 22px;
+        border: 0;
+        border-radius: 8px;
+        box-shadow: 0 24px 60px rgba(17, 24, 39, 0.24);
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+
+        span {
+            display: block;
+            margin-bottom: 5px;
+            color: $login-violet;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            margin: 0;
+            color: $login-ink;
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+    }
+
+    &__close {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        padding: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+        color: $login-muted;
+        cursor: pointer;
+
+        svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-color: #cbd5e1;
+            color: $login-ink;
+            outline: 0;
+        }
+    }
+
+    &__copy {
+        margin: 0;
+        color: $login-muted;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    &__actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+
+        button {
+            min-height: 46px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+
+            &:first-child {
+                border: 1px solid #d5dce6;
+                background: #ffffff;
+                color: $login-charcoal;
+
+                &:hover{
+                    background: #ebebeb;
+                    border-color: #c3c3c3;
+                }
+            }
+
+            &:last-child {
+                border: 0;
+                background: $login-charcoal;
+                color: #ffffff;
+                &:hover{
+                    background: #293444;
+                }
+            }
+        }
     }
 }
 
 @media (max-width: 940px) {
     .login-page {
-        align-items: flex-start;
+        align-items: center;
+        background: #f4f5f7;
+        padding: 18px;
+
+        &::before {
+            display: none;
+        }
 
         &__shell {
             grid-template-columns: 1fr;
             width: min(100%, 560px);
+            max-height: 100%;
+            gap: 14px;
         }
 
         &__auth {
-            padding: 28px;
+            padding: clamp(18px, 4vh, 28px);
         }
 
         &__brand {
@@ -596,94 +1061,84 @@ $login-success: #127a43;
         }
     }
 
-    .login-showcase {
+    .login-hero {
         min-height: auto;
-        padding: 26px;
+        gap: 26px;
+        padding: 24px;
 
-        &__brand {
-            display: none;
+        &__logo {
+            width: 90px;
+            height: 90px;
         }
 
-        &__headline {
-            margin-top: 0;
-
+        &__copy {
             h2 {
-                font-size: 34px;
+                font-size: 30px;
+            }
+
+            p {
+                margin-top: 12px;
             }
         }
+    }
 
-        &__board {
-            margin: 28px 0;
-        }
+    .login-showcase {
+        display: none;
     }
 }
 
 @media (max-width: 560px) {
     .login-page {
-        padding: 0;
-        background-size: 30px 30px, 30px 30px, auto;
+        padding: 12px;
 
         &__shell {
             width: 100%;
-            gap: 0;
-        }
-
-        &__auth,
-        .login-showcase {
-            border-radius: 0;
-            box-shadow: none;
+            gap: 12px;
         }
 
         &__auth {
-            padding: 26px 18px 30px;
+            padding: 18px;
+            box-shadow: 0 14px 34px rgba(17, 24, 39, 0.11);
         }
 
         &__intro {
             h1 {
-                font-size: 31px;
+                font-size: 30px;
             }
         }
     }
 
-    .login-showcase {
-        padding: 24px 18px;
+    .login-hero {
+        padding: 18px;
 
-        &__headline h2 {
-            font-size: 29px;
+        &__logo {
+            width: 72px;
+            height: 72px;
         }
 
-        &__board {
-            grid-template-columns: 1fr;
-        }
-
-        &__session {
-            min-height: 210px;
-            padding: 16px;
-        }
-
-        &__wave {
-            height: 104px;
-            gap: 7px;
-            margin: 26px 0 18px;
-        }
-
-        &__mixer {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-
-            div {
-                min-height: 48px;
-                grid-template-columns: 1fr;
-                justify-items: center;
+        &__copy {
+            span {
+                margin-bottom: 8px;
+                font-size: 11px;
             }
+
+            h2 {
+                font-size: 24px;
+                line-height: 1.1;
+            }
+
+            p {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+        }
+
+        &__features {
+            grid-template-columns: 1fr;
 
             span {
-                width: 100%;
+                padding: 10px;
             }
-        }
-
-        &__stats {
-            grid-template-columns: 1fr;
         }
     }
 
@@ -696,5 +1151,25 @@ $login-success: #127a43;
         &__register {
             text-align: left;
         }
+
+        &__status {
+            display: none;
+        }
+    }
+}
+
+@media (max-height: 720px) {
+    .login-form__status {
+        display: none;
+    }
+
+    .login-showcase__stats {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .login-form__social-buttons {
+        grid-template-columns: 1fr;
     }
 }

@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationReadController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\DemoController as AdminDemoController;
 use App\Http\Controllers\Admin\DownloadSalesController;
@@ -27,10 +30,21 @@ Route::redirect('/demo', '/');
 Route::post('/demo/{musicDemo}/play', [CustomerDemoController::class, 'recordPlay'])->name('demo.play');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
+Route::get('/auth/google', [SocialAuthController::class, 'redirect'])->defaults('provider', 'google')->name('auth.google.redirect');
+Route::get('/auth/google/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'google')->name('auth.google.callback');
+Route::get('/auth/facebook', [SocialAuthController::class, 'redirect'])->defaults('provider', 'facebook')->name('auth.facebook.redirect');
+Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'facebook')->name('auth.facebook.callback');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/notifications/read', [NotificationReadController::class, 'store'])->name('notifications.read');
 
 Route::get('/subcription', [CustomerSubscriptionController::class, 'index'])->name('subcription');
 Route::post('/subcription/payment', [CustomerSubscriptionController::class, 'storePayment'])->name('subcription.payment');
+Route::get('/payment/midtrans/finish', [CustomerSubscriptionController::class, 'midtransFinish'])->name('payment.midtrans.finish');
+Route::post('/payment/midtrans/notification', [CustomerSubscriptionController::class, 'midtransNotification'])->name('payment.midtrans.notification');
 
 
 /*
@@ -52,6 +66,8 @@ Route::middleware('customer.access')->group(function () {
         ->name('sampling-requests.store');
     Route::post('/sampling-requests/{samplingRequest}/payment', [CustomerSamplingRequestController::class, 'pay'])
         ->name('sampling-requests.payment');
+    Route::post('/sampling-requests/{samplingRequest}/payment/sync', [CustomerSamplingRequestController::class, 'syncPayment'])
+        ->name('sampling-requests.payment.sync');
     Route::post('/sampling-requests/{samplingRequest}/n27', [CustomerSamplingRequestController::class, 'uploadN27'])
         ->name('sampling-requests.n27.upload');
 

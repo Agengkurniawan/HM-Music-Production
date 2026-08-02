@@ -144,7 +144,7 @@
                                             <strong>{{ $demo['title'] }}</strong>
                                             <span>{{ $demo['genre'] }} / {{ $demo['bpm'] }} BPM / {{ $demo['duration'] ?? 'Preview' }}</span>
                                         </div>
-                                        <span class="demo-item__badge" style="--accent: {{ $demo['color'] }}">{{ $demo['source'] }}</span>
+                                        <span class="demo-item__badge">{{ $demo['source'] }}</span>
                                         <a href="{{ route('demo') }}" aria-label="Open {{ $demo['title'] }} demo">
                                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                                 <polygon points="8 5 19 12 8 19 8 5" />
@@ -160,47 +160,70 @@
                             </div>
                         </article>
 
-                        <aside class="dashboard-panel plan-panel {{ ($user['is_premium'] ?? false) ? 'is-premium' : 'is-free' }}">
+                        @php
+                            $isPremium = $user['is_premium'] ?? false;
+                            $planExpiresAt = $user['expires_at'] ?? null;
+                            $planMeta = $isPremium
+                                ? ($planExpiresAt ? 'Active until '.$planExpiresAt->format('d M Y') : 'Active access')
+                                : 'Free preview access';
+                        @endphp
+
+                        <aside class="dashboard-panel plan-panel {{ $isPremium ? 'is-premium' : 'is-free' }}">
                             <div class="plan-panel__status">
-                                <span>{{ ($user['is_premium'] ?? false) ? 'Premium Active' : 'Preview Mode' }}</span>
+                                <div class="plan-panel__status-top">
+                                    <span class="plan-panel__badge">{{ $isPremium ? 'Premium Active' : 'Preview Mode' }}</span>
+                                </div>
+                                <small>Current Plan</small>
                                 <strong>{{ $user['plan'] ?? 'Free Plan' }}</strong>
                                 <p>
-                                    {{ ($user['is_premium'] ?? false) ? 'STY downloads are unlocked. Sampling voice packs are bought separately per pack.' : 'Listen first, then unlock STY style downloads when you are ready.' }}
+                                    {{ $isPremium ? 'STY downloads are unlocked. Sampling voice packs are bought separately per pack.' : 'Listen first, then unlock STY style downloads when you are ready.' }}
                                 </p>
+                                <div class="plan-panel__meta">
+                                    <span>{{ $planMeta }}</span>
+                                </div>
                             </div>
 
                             <div class="plan-panel__perks" aria-label="Plan access">
-                                <span>
+                                <div class="plan-panel__perk">
                                     <svg viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M20 6 9 17l-5-5" />
                                     </svg>
-                                    YouTube Demos
-                                </span>
-                                <span class="{{ ($user['is_premium'] ?? false) ? '' : 'is-muted' }}">
+                                    <span>
+                                        <strong>YouTube Demos</strong>
+                                        <small>Included</small>
+                                    </span>
+                                </div>
+                                <div class="plan-panel__perk {{ $isPremium ? '' : 'is-muted' }}">
                                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        @if($user['is_premium'] ?? false)
+                                        @if($isPremium)
                                             <path d="M20 6 9 17l-5-5" />
                                         @else
                                             <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                                             <rect x="5" y="11" width="14" height="10" rx="2" />
                                         @endif
                                     </svg>
-                                    STY Files
-                                </span>
-                                <span>
+                                    <span>
+                                        <strong>STY Files</strong>
+                                        <small>{{ $isPremium ? 'Unlocked' : 'Premium only' }}</small>
+                                    </span>
+                                </div>
+                                <div class="plan-panel__perk">
                                     <svg viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                         <path d="M14 2v6h6" />
                                     </svg>
-                                    Sampling Packs
-                                </span>
+                                    <span>
+                                        <strong>Sampling Packs</strong>
+                                        <small>Separate order</small>
+                                    </span>
+                                </div>
                             </div>
 
                             <a href="{{ route('subcription') }}" class="plan-panel__cta">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M12 2 15 8.3l7 .9-5.1 4.7 1.3 7L12 17.4 5.8 20.9l1.3-7L2 9.2l7-.9L12 2Z" />
                                 </svg>
-                                {{ ($user['is_premium'] ?? false) ? 'Manage Plan' : 'Unlock Downloads' }}
+                                {{ $isPremium ? 'Manage Plan' : 'Unlock Downloads' }}
                             </a>
                         </aside>
                     </section>

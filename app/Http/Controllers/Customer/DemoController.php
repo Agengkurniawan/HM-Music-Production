@@ -25,28 +25,41 @@ class DemoController extends Controller
 
         return view('layouts.customers.demo', [
             'demos' => MusicDemo::published()
-                ->withYoutubeVideo()
-                ->whereIn('genre', MusicDemo::GENRES)
+                ->withPlayableMedia()
+                ->whereIn('genre', MusicDemo::genreOptions())
                 ->orderByDesc('is_trending')
                 ->latest()
                 ->get(),
-            'categories' => ['All', ...MusicDemo::GENRES],
+            'categories' => ['All', ...MusicDemo::genreOptions()],
+            'hasActiveSubscription' => $this->hasActiveSubscription($user),
         ]);
     }
 
     public function recordPlay(Request $request, MusicDemo $musicDemo): JsonResponse
     {
-        abort_unless($musicDemo->status === 'Published' && $musicDemo->youtube_video_id, 404);
+        abort_unless(
+            $musicDemo->status === 'Published'
+            && ($musicDemo->youtube_video_id || filled($musicDemo->installation_video_path)),
+            404
+        );
 
         $musicDemo->increment('plays_count');
         $musicDemo->refresh();
 
         $request->user()?->update([
-            'last_activity' => 'Played '.$musicDemo->title.' YouTube demo',
+            'last_activity' => 'Played '.$musicDemo->title.' demo',
         ]);
 
         return response()->json([
             'plays_count' => $musicDemo->plays_count,
         ]);
+    }
+
+    private function hasActiveSubscription($user): bool
+    {
+        $subscription = $user?->activeSubscription()->first();
+
+        return $subscription !== null
+            && ($subscription->expires_at === null || $subscription->expires_at->isFuture());
     }
 }

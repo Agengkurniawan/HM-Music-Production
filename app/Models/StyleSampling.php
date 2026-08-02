@@ -25,7 +25,7 @@ class StyleSampling extends Model
         'HM Gamelan Expansion Packs' => ['Gamelan'],
     ];
     public const SAMPLING_TOTAL_SIZE_MB = 768;
-    public const SAMPLING_REQUEST_PRICE = 750000;
+    public const SAMPLING_REQUEST_PRICE = 800000;
     public const SAMPLING_REQUEST_PACKS = [
         'HM Dangdut Expansion Packs' => [
             'label' => 'Pack 1 - Dangdut',
@@ -182,7 +182,7 @@ class StyleSampling extends Model
             'short_label' => $packName,
             'size_mb' => null,
             'price' => self::SAMPLING_REQUEST_PRICE,
-            'summary' => 'Sampling pack berisi voice kit untuk dipakai oleh beberapa style. Harga tetap Rp 750.000.',
+            'summary' => 'Sampling pack berisi voice kit untuk dipakai oleh beberapa style. Harga tetap Rp 800.000.',
             'voice_kits' => [],
         ];
     }
@@ -234,10 +234,10 @@ class StyleSampling extends Model
         $sizeMb = $option['size_mb'] ?? null;
 
         if ($keyboardStorageMb !== null && $sizeMb !== null && $keyboardStorageMb < $sizeMb) {
-            return "{$option['label']} sekitar {$sizeMb} MB, sementara kapasitas keyboard yang diisi {$keyboardStorageMb} MB. Harga sampling tetap Rp 750.000 dan isi voice kit perlu disesuaikan.";
+            return "{$option['label']} sekitar {$sizeMb} MB, sementara kapasitas keyboard yang diisi {$keyboardStorageMb} MB. Harga sampling tetap Rp 800.000 dan isi voice kit perlu disesuaikan.";
         }
 
-        return "{$option['label']} berisi voice kit untuk banyak style. Harga sampling tetap Rp 750.000; setelah bayar, upload N27 agar admin connect voice kit ke keyboard.";
+        return "{$option['label']} berisi voice kit untuk banyak style. Harga sampling tetap Rp 800.000; setelah bayar, upload N27 agar admin connect voice kit ke keyboard.";
     }
 
     public static function formatSamplingSize(?int $sizeMb): string

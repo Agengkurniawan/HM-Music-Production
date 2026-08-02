@@ -169,6 +169,45 @@ $sub-green: #16a34a;
         line-height: 1.6;
     }
 
+    &__status {
+        display: grid;
+        gap: 4px;
+        padding: 12px 14px;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: #eff6ff;
+
+        strong {
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        span {
+            color: #475569;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        &.is-active {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+
+            strong {
+                color: #15803d;
+            }
+        }
+
+        &.is-expired {
+            border-color: #fed7aa;
+            background: #fff7ed;
+
+            strong {
+                color: #c2410c;
+            }
+        }
+    }
+
     .features {
         display: grid;
         gap: 12px;
@@ -190,7 +229,7 @@ $sub-green: #16a34a;
     .current-btn,
     .subscribe-btn {
         width: 100%;
-        min-height: 48px;
+        height: 48px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -202,9 +241,11 @@ $sub-green: #16a34a;
         cursor: pointer;
     }
 
+
     .current-btn {
         background: #f3f4f6;
         color: #94a3b8;
+        margin-top: 3vh;
     }
 
     .subscribe-btn {

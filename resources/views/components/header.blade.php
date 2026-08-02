@@ -43,7 +43,7 @@
             <header class="page-header">
                 <div class="page-header__text">
                     <h1 class="page-header__title">Subscription</h1>
-                    <p class="page-header__subtitle">Register, submit N27, and use test checkout while Midtrans is prepared.</p>
+                    <p class="page-header__subtitle">Register, subscribe, and complete sandbox payments through Midtrans.</p>
                 </div>
             </header>
             @break
@@ -71,6 +71,7 @@
             <a href="javascript:void(0);"
                 id="openNotification"
                 data-notification-toggle
+                data-notification-count="{{ $headerNotificationCount }}"
                 aria-controls="notificationPanel"
                 aria-expanded="false"
                 aria-label="Open notifications">
@@ -80,7 +81,7 @@
                 </svg>
 
                 @if($headerNotificationCount > 0)
-                    <p>{{ $headerNotificationBadge }}</p>
+                    <p data-notification-badge data-count="{{ $headerNotificationCount }}">{{ $headerNotificationBadge }}</p>
                 @endif
             </a>
         </div>

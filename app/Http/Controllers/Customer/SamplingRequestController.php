@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\SamplingRequest;
 use App\Models\StyleSampling;
+use App\Services\MidtransSnapGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +14,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class SamplingRequestController extends Controller
 {
     public function store(Request $request): RedirectResponse
     {
+        if ($request->filled('pack_name')) {
+            $request->merge([
+                'pack_name' => StyleSampling::normalizeSamplingPackName((string) $request->input('pack_name')),
+            ]);
+        }
+
         $validated = $request->validate([
             'pack_name' => ['required', Rule::in(StyleSampling::samplingRequestPackNames())],
             'keyboard_storage_mb' => ['nullable', 'integer', 'min:1', 'max:4096'],
@@ -72,11 +80,17 @@ class SamplingRequestController extends Controller
             ])->save();
         }
 
-        DB::transaction(function () use ($request, $samplingRequest): void {
+        $gateway = app(MidtransSnapGateway::class);
+
+        $payment = DB::transaction(function () use ($request, $samplingRequest, $gateway): Payment {
             $user = $request->user();
             $samplingPackOption = $samplingRequest->pack_name
                 ? StyleSampling::samplingRequestOption($samplingRequest->pack_name)
                 : null;
+
+            if ($samplingRequest->payment?->status === 'Pending') {
+                $samplingRequest->payment->update(['status' => 'Cancelled']);
+            }
 
             $payment = Payment::create([
                 'user_id' => $user?->id,
@@ -86,27 +100,123 @@ class SamplingRequestController extends Controller
                 'customer_phone' => null,
                 'package' => $samplingPackOption['label'] ?? $samplingRequest->product_name,
                 'amount' => $samplingRequest->amount,
-                'method' => 'Midtrans Sampling Checkout',
-                'status' => 'Completed',
+                'method' => 'Midtrans Sampling '.$gateway->environmentLabel(),
+                'status' => 'Pending',
                 'reference' => $this->makePaymentReference(),
             ]);
 
             $samplingRequest->update([
                 'payment_id' => $payment->id,
-                'payment_status' => SamplingRequest::PAYMENT_PAID,
-                'status' => $samplingRequest->has_n27_file
-                    ? SamplingRequest::STATUS_N27_UPLOADED
-                    : SamplingRequest::STATUS_PAID,
+                'payment_status' => SamplingRequest::PAYMENT_PENDING,
+                'status' => SamplingRequest::STATUS_PENDING_PAYMENT,
             ]);
 
             $user?->update([
-                'last_activity' => 'Paid sampling '.$samplingRequest->order_reference,
+                'last_activity' => 'Started sampling payment '.$samplingRequest->order_reference,
             ]);
+
+            return $payment;
         });
+
+        try {
+            $snapTransaction = $gateway->createTransaction(
+                $payment,
+                $request->user(),
+                'hm-sampling-pack',
+            );
+        } catch (RuntimeException $exception) {
+            $payment->update(['status' => 'Failed']);
+
+            throw ValidationException::withMessages([
+                'payment' => $exception->getMessage(),
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            $payment->update(['status' => 'Failed']);
+
+            throw ValidationException::withMessages([
+                'payment' => 'Midtrans checkout sampling belum bisa dibuat. Periksa konfigurasi Server Key dan koneksi payment gateway.',
+            ]);
+        }
+
+        $request->session()->put('pending_payment_reference', $payment->reference);
+
+        return redirect()->away($snapTransaction['redirect_url']);
+    }
+
+    public function syncPayment(SamplingRequest $samplingRequest, MidtransSnapGateway $gateway): RedirectResponse
+    {
+        abort_unless($samplingRequest->user_id === Auth::id(), 403);
+
+        if ($samplingRequest->payment_status === SamplingRequest::PAYMENT_PAID) {
+            return redirect()
+                ->route('stylesampling', ['type' => 'sampling'])
+                ->with('success', 'Pembayaran sampling sudah berhasil. Form upload N27 sudah terbuka.');
+        }
+
+        $payment = $samplingRequest->payment;
+
+        if (! $payment) {
+            return redirect()
+                ->route('stylesampling', ['type' => 'sampling'])
+                ->withErrors([
+                    'payment' => 'Belum ada transaksi Midtrans untuk order ini. Klik Bayar via Midtrans terlebih dahulu.',
+                ]);
+        }
+
+        try {
+            $payload = $gateway->transactionStatus($payment->reference);
+        } catch (RuntimeException $exception) {
+            throw ValidationException::withMessages([
+                'payment' => $exception->getMessage(),
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'payment' => 'Status pembayaran belum bisa dicek. Pastikan Server Key sandbox benar dan coba lagi.',
+            ]);
+        }
+
+        if ($gateway->completedStatus($payload) && ! $gateway->paymentAmountMatches($payment, $payload)) {
+            return redirect()
+                ->route('stylesampling', ['type' => 'sampling'])
+                ->withErrors([
+                    'payment' => 'Nominal pembayaran Midtrans tidak sesuai invoice sampling. Hubungi admin sebelum upload N27.',
+                ]);
+        }
+
+        if ($gateway->completedStatus($payload)) {
+            $this->completeSamplingPayment($samplingRequest, $payment);
+
+            return redirect()
+                ->route('stylesampling', ['type' => 'sampling'])
+                ->with('success', 'Pembayaran sampling berhasil dikonfirmasi. Silakan upload file N27.');
+        }
+
+        $failedStatus = $gateway->failedStatus($payload);
+
+        if ($failedStatus) {
+            DB::transaction(function () use ($samplingRequest, $payment, $failedStatus): void {
+                $payment->update(['status' => $failedStatus]);
+
+                $samplingRequest->update([
+                    'payment_status' => SamplingRequest::PAYMENT_PENDING,
+                    'status' => SamplingRequest::STATUS_PENDING_PAYMENT,
+                ]);
+            });
+
+            return redirect()
+                ->route('stylesampling', ['type' => 'sampling'])
+                ->withErrors([
+                    'payment' => "Pembayaran Midtrans berstatus {$failedStatus}. Silakan buat pembayaran baru.",
+                ]);
+        }
 
         return redirect()
             ->route('stylesampling', ['type' => 'sampling'])
-            ->with('success', 'Pembayaran sampling pack via Midtrans berhasil. Upload N27 sudah terbuka agar admin bisa connect voice kit ke keyboard.');
+            ->with('success', 'Pembayaran masih diproses oleh Midtrans. Setelah berhasil, klik Cek Status Pembayaran lagi agar upload N27 terbuka.');
     }
 
     public function uploadN27(Request $request, SamplingRequest $samplingRequest): RedirectResponse
@@ -145,6 +255,25 @@ class SamplingRequestController extends Controller
         return redirect()
             ->route('stylesampling', ['type' => 'sampling'])
             ->with('success', 'N27 file uploaded. The admin can now process it in Yamaha Expansion Manager.');
+    }
+
+    private function completeSamplingPayment(SamplingRequest $samplingRequest, Payment $payment): void
+    {
+        DB::transaction(function () use ($samplingRequest, $payment): void {
+            $payment->update(['status' => 'Completed']);
+
+            $samplingRequest->update([
+                'payment_id' => $payment->id,
+                'payment_status' => SamplingRequest::PAYMENT_PAID,
+                'status' => $samplingRequest->has_n27_file
+                    ? SamplingRequest::STATUS_N27_UPLOADED
+                    : SamplingRequest::STATUS_PAID,
+            ]);
+
+            $samplingRequest->user?->update([
+                'last_activity' => 'Paid sampling '.$samplingRequest->order_reference.' via Midtrans',
+            ]);
+        });
     }
 
     private function makeSamplingReference(): string

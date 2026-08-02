@@ -2,19 +2,20 @@
     $notifications = collect($notifications ?? []);
 @endphp
 
-<div id="notificationPanel" class="notification-panel" aria-hidden="true">
+<div id="notificationPanel" class="notification-panel" aria-hidden="true" data-notification-read-url="{{ route('notifications.read') }}">
     <div class="notification-header">
         <h3>Notifications</h3>
         <button id="closeNotification" data-notification-close type="button" aria-label="Close notifications">&times;</button>
     </div>
 
     <div class="notification-body">
-        @forelse($notifications as $notification)
+        @foreach($notifications as $notification)
             @php
                 $type = $notification['type'] ?? 'default';
+                $key = $notification['key'] ?? '';
             @endphp
 
-            <a class="notification-item notification-item--{{ $type }}" href="{{ $notification['url'] ?? '#' }}">
+            <a class="notification-item notification-item--{{ $type }}" href="{{ $notification['url'] ?? '#' }}" data-notification-item data-notification-key="{{ $key }}">
                 <strong>
                     @switch($type)
                         @case('customer')
@@ -44,11 +45,11 @@
                 <p>{{ $notification['message'] ?? '' }}</p>
                 <span>{{ $notification['time'] ?? '' }}</span>
             </a>
-        @empty
-            <div class="notification-empty">
-                <strong>{{ $emptyTitle ?? 'No notifications' }}</strong>
-                <p>{{ $emptyMessage ?? 'New activity will appear here.' }}</p>
-            </div>
-        @endforelse
+        @endforeach
+
+        <div class="notification-empty" data-notification-empty @if($notifications->isNotEmpty()) hidden @endif>
+            <strong>{{ $emptyTitle ?? 'No notifications' }}</strong>
+            <p>{{ $emptyMessage ?? 'New activity will appear here.' }}</p>
+        </div>
     </div>
 </div>

@@ -1,5 +1,6 @@
 @php
     $genres = empty($genres ?? []) ? \App\Models\MusicDemo::GENRES : $genres;
+    $demoGenres = collect($genres)->reject(fn ($genre) => $genre === \App\Models\MusicDemo::GENRE_NONE);
     $categories = empty($categories ?? []) ? \App\Models\StyleSampling::CATEGORIES : $categories;
     $packs = empty($packs ?? []) ? \App\Models\StyleSampling::PACKS : $packs;
     $styleProducts = collect($styleProducts ?? []);
@@ -11,11 +12,11 @@
 @if(request()->routeIs('admin.demo'))
     <div class="modal fade" id="uploadDemoModal" tabindex="-1" aria-labelledby="uploadDemoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content modal-form" action="{{ route('admin.demo.store') }}" method="POST">
+            <form class="modal-content modal-form" action="{{ route('admin.demo.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <div>
-                        <span class="modal-eyebrow">YouTube video</span>
+                        <span class="modal-eyebrow">Demo video</span>
                         <h2 class="modal-title" id="uploadDemoModalLabel">Add New Demo</h2>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -24,12 +25,13 @@
                 <div class="modal-body">
                     <label>
                         YouTube Video URL
-                        <input type="url" name="youtube_url" value="{{ old('youtube_url') }}" placeholder="https://www.youtube.com/watch?v=..." required>
+                        <input type="url" name="youtube_url" value="{{ old('youtube_url') }}" placeholder="https://www.youtube.com/watch?v=...">
                     </label>
 
-                    <label>
-                        Installation YouTube URL
-                        <input type="url" name="installation_youtube_url" value="{{ old('installation_youtube_url') }}" placeholder="https://www.youtube.com/watch?v=...">
+                    <label class="modal-file">
+                        MP4 Video Upload
+                        <input type="file" name="installation_video" accept="video/mp4">
+                        <span>Optional .mp4 up to 200MB. Add a YouTube URL or upload an MP4 video.</span>
                     </label>
 
                     <div class="modal-grid">
@@ -40,8 +42,9 @@
 
                         <label>
                             Genre
-                            <select name="genre" required>
-                                @foreach($genres as $genre)
+                            <select name="genre">
+                                <option value="" @selected(blank(old('genre')))>None</option>
+                                @foreach($demoGenres as $genre)
                                     <option value="{{ $genre }}" @selected(old('genre') === $genre)>{{ $genre }}</option>
                                 @endforeach
                             </select>
@@ -51,7 +54,7 @@
                     <div class="modal-grid">
                         <label>
                             BPM
-                            <input type="number" name="bpm" value="{{ old('bpm') }}" placeholder="140" min="1" max="300" required>
+                            <input type="number" name="bpm" value="{{ old('bpm') }}" placeholder="140" min="1" max="300">
                         </label>
 
                         <label>
@@ -75,7 +78,7 @@
                         </label>
                     </div>
 
-                    <p class="modal-context">Thumbnail diambil otomatis dari video YouTube.</p>
+                    <p class="modal-context">Thumbnail YouTube diambil otomatis. MP4 memakai cover demo default.</p>
 
                     <label class="modal-toggle">
                         <input type="checkbox" name="trending">
@@ -86,7 +89,7 @@
                 <hr>
                 <div class="modal-footer">
                     <button type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit">Save YouTube Demo</button>
+                    <button type="submit">Save Demo</button>
                 </div>
             </form>
         </div>
@@ -95,7 +98,7 @@
     <div class="modal fade" id="demoEditModal" tabindex="-1" aria-labelledby="demoEditModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form class="modal-form" action="#" method="POST">
+                <form class="modal-form" action="#" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -112,19 +115,21 @@
 
                         <label>
                             YouTube Video URL
-                            <input type="url" name="youtube_url" data-demo-edit-youtube-url required>
+                            <input type="url" name="youtube_url" data-demo-edit-youtube-url>
                         </label>
 
-                        <label>
-                            Installation YouTube URL
-                            <input type="url" name="installation_youtube_url" data-demo-edit-installation-youtube-url>
+                        <label class="modal-file">
+                            Replace MP4 Video
+                            <input type="file" name="installation_video" accept="video/mp4" data-demo-edit-installation-video>
+                            <span data-demo-edit-installation-status>No MP4 video yet. Upload one to show the MP4 video button.</span>
                         </label>
 
                         <div class="modal-grid">
                             <label>
                                 Genre
-                                <select name="genre" data-demo-edit-genre required>
-                                    @foreach($genres as $genre)
+                                <select name="genre" data-demo-edit-genre>
+                                    <option value="">None</option>
+                                    @foreach($demoGenres as $genre)
                                         <option value="{{ $genre }}">{{ $genre }}</option>
                                     @endforeach
                                 </select>
@@ -132,7 +137,7 @@
 
                             <label>
                                 BPM
-                                <input type="number" name="bpm" min="1" max="300" data-demo-edit-bpm required>
+                                <input type="number" name="bpm" min="1" max="300" data-demo-edit-bpm>
                             </label>
                         </div>
 
@@ -161,6 +166,12 @@
                             <input type="checkbox" name="trending" value="1" data-demo-edit-trending>
                             <span></span>
                             Mark as trending
+                        </label>
+
+                        <label class="modal-toggle">
+                            <input type="checkbox" name="remove_installation_video" value="1" data-demo-edit-remove-installation>
+                            <span></span>
+                            Remove MP4 video
                         </label>
                     </div>
                     <hr>
@@ -241,7 +252,7 @@
                             <path d="M12 3v12" />
                         </svg>
                         <strong id="styleFileName">Choose style file</strong>
-                        <span>.sty, .prs, atau .sst up to 50MB</span>
+                        <span>.sty up to 50MB</span>
                     </label>
 
                     <div class="modal-grid">
@@ -397,12 +408,12 @@
 
                         <label>
                             Sampling Price
-                            <input type="number" name="amount" min="0" step="1000" placeholder="750000" data-sampling-payment-amount required>
+                            <input type="number" name="amount" min="0" step="1000" placeholder="{{ \App\Models\StyleSampling::SAMPLING_REQUEST_PRICE }}" data-sampling-payment-amount required>
                         </label>
 
                         <label>
                             Admin Note
-                            <textarea name="admin_notes" rows="4" placeholder="Harga tetap Rp 750.000, ukuran pack, dan instruksi pembayaran." data-sampling-payment-notes></textarea>
+                            <textarea name="admin_notes" rows="4" placeholder="Harga tetap Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }}, ukuran pack, dan instruksi pembayaran." data-sampling-payment-notes></textarea>
                         </label>
                     </div>
                     <hr>
@@ -681,7 +692,7 @@
                 <hr>
                 <div class="modal-footer user-manage-modal__footer">
                     <button type="button" data-bs-dismiss="modal">Close</button>
-                    <button type="button" onclick="window.location.href='{{ route('admin.sampling-requests') }}'">Open N27 Queue</button>
+                    <button type="button" onclick="window.location.href" ='{{ route('admin.sampling-requests') }}'">Open N27 Queue</button>
                 </div>
             </div>
         </div>
@@ -692,16 +703,21 @@
     @php
         $premiumPlan = ($plans ?? [])['premium_monthly'] ?? [
             'name' => 'Premium Monthly',
-            'price' => 29000,
+            'price' => \App\Models\SiteSetting::DEFAULT_SUBSCRIPTION_PRICE,
         ];
+        $checkoutUser = auth()->user();
+        $hasActiveSubscription = $hasActiveSubscription ?? false;
+        $checkoutModeLabel = $checkoutUser
+            ? ($hasActiveSubscription ? 'Extend STY Access' : 'Renew STY Access')
+            : 'Register or Renew STY';
     @endphp
     <div class="modal fade" id="subscriptionPaymentModal" tabindex="-1" aria-labelledby="subscriptionPaymentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <span class="modal-eyebrow">Premium Test Checkout</span>
-                        <h2 class="modal-title" id="subscriptionPaymentModalLabel">Register & Unlock STY</h2>
+                        <span class="modal-eyebrow">Premium Payment</span>
+                        <h2 class="modal-title" id="subscriptionPaymentModalLabel">{{ $checkoutModeLabel }}</h2>
                     </div>
 
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -711,7 +727,7 @@
                     @csrf
                     <input type="hidden" name="package" value="{{ $premiumPlan['name'] }}">
                     <input type="hidden" name="amount" value="{{ (int) $premiumPlan['price'] }}">
-                    <input type="hidden" name="method" value="Test Checkout (Midtrans skipped)">
+                    <input type="hidden" name="method" value="Midtrans Snap Sandbox">
                     <hr>
                     <div class="modal-body">
                         <div class="modal-summary">
@@ -721,39 +737,69 @@
                             </div>
 
                             <div>
-                                <span>Test Payment</span>
+                                <span>Midtrans Payment</span>
                                 <strong>Rp {{ number_format((int) $premiumPlan['price'], 0, ',', '.') }}</strong>
                             </div>
                         </div>
 
+                        <div class="social-register">
+                            @if($checkoutUser?->hasSocialLogin())
+                                <div class="social-register__connected">
+                                    <strong>{{ $checkoutUser->socialLoginProviderLabel() }} connected</strong>
+                                    <span>{{ $checkoutUser->email }}</span>
+                                </div>
+                            @else
+                                <div class="social-register__actions">
+                                    <a class="social-register__button" href="{{ route('auth.google.redirect', ['intent' => 'subscription']) }}">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path fill="#4285F4" d="M22.6 12.23c0-.78-.07-1.53-.2-2.23H12v4.26h5.94c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.58c2.09-1.93 3.29-4.77 3.29-8.09Z" />
+                                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.68l-3.58-2.75c-.98.66-2.24 1.06-3.7 1.06-2.84 0-5.25-1.92-6.11-4.5H2.2v2.84C4.01 20.55 7.72 23 12 23Z" />
+                                            <path fill="#FBBC05" d="M5.89 14.13A6.6 6.6 0 0 1 5.53 12c0-.74.13-1.45.36-2.13V7.03H2.2A10.95 10.95 0 0 0 1 12c0 1.78.43 3.46 1.2 4.97l3.69-2.84Z" />
+                                            <path fill="#EA4335" d="M12 5.37c1.62 0 3.06.56 4.21 1.64l3.16-3.16C17.45 2.06 14.97 1 12 1 7.72 1 4.01 3.45 2.2 7.03l3.69 2.84C6.75 7.29 9.16 5.37 12 5.37Z" />
+                                        </svg>
+                                        <span>Google</span>
+                                    </a>
+                                    <a class="social-register__button social-register__button--facebook" href="{{ route('auth.facebook.redirect', ['intent' => 'subscription']) }}">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path fill="currentColor" d="M13.62 22v-8.77h2.94l.44-3.42h-3.38V7.63c0-.99.28-1.66 1.69-1.66h1.8V2.92c-.31-.04-1.38-.13-2.62-.13-2.59 0-4.37 1.58-4.37 4.49v2.53H7.18v3.42h2.94V22h3.5Z" />
+                                        </svg>
+                                        <span>Facebook</span>
+                                    </a>
+                                </div>
+                                <p>Pilih akun Google atau Facebook yang sedang terhubung di browser. Email akan diisi dan ditautkan otomatis.</p>
+                            @endif
+                        </div>
+
                         <div class="modal-section">
                             <span>Customer Data</span>
-                            <h3>Registration</h3>
+                            <h3>Registration or Renewal</h3>
                         </div>
 
                         <div class="modal-grid">
                             <label>
                                 Full Name
-                                <input type="text" name="name" value="{{ old('name') }}" placeholder="Your name" required>
+                                <input type="text" name="name" value="{{ old('name', $checkoutUser?->name) }}" placeholder="Your name" required>
                                 @error('name')<small>{{ $message }}</small>@enderror
                             </label>
 
                             <label>
-                                Email
-                                <input type="email" name="email" value="{{ old('email') }}" placeholder="name@email.com" required>
+                                Email / Gmail
+                                <input id="subscription-email" type="email" name="email" value="{{ old('email', $checkoutUser?->email) }}" placeholder="name@gmail.com" @readonly($checkoutUser) required>
                                 @error('email')<small>{{ $message }}</small>@enderror
                             </label>
 
-                            <label>
-                                Password
-                                <input type="password" name="password" placeholder="Create password" required>
-                                @error('password')<small>{{ $message }}</small>@enderror
-                            </label>
+                            @unless($checkoutUser?->hasSocialLogin())
+                                <label>
+                                    Password
+                                    <input type="password" name="password" placeholder="{{ $checkoutUser ? 'Confirm current password' : 'Create new or enter current password' }}" required>
+                                    @error('password')<small>{{ $message }}</small>@enderror
+                                </label>
 
-                            <label>
-                                Confirm Password
-                                <input type="password" name="password_confirmation" placeholder="Repeat password" required>
-                            </label>
+                                <label>
+                                    Confirm Password
+                                    <input type="password" name="password_confirmation" placeholder="Repeat password" required>
+                                </label>
+                            @endunless
 
                             <label>
                                 Phone
@@ -768,25 +814,12 @@
                                 @error('profile_photo')<small>{{ $message }}</small>@enderror
                             </label>
 
-                            <label>
-                                Checkout Status
-                                <input type="text" value="Pembayaran diskip untuk uji coba" disabled>
-                                @error('method')<small>{{ $message }}</small>@enderror
-                            </label>
-                        </div>
-
-                        <div class="modal-note">
-                            <div>
-                                <span>Test Flow</span>
-                                <strong>Payment Skipped</strong>
-                            </div>
-                            <p>Untuk uji coba, submit form akan membuat akun, menyimpan password, dan menandai subscription completed. Subscription ini hanya membuka download STY, sedangkan sampling voice pack dibeli terpisah sesuai pack yang dipakai style.</p>
                         </div>
                     </div>
                     <hr>
                     <div class="modal-footer">
                         <button type="button" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit">Register & Unlock STY</button>
+                        <button type="submit">{{ $checkoutModeLabel }}</button>
                     </div>
                 </form>
             </div>

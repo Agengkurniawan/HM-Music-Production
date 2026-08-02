@@ -151,7 +151,7 @@ $download-admin-hover-shadow: 0 24px 60px rgba(19, 24, 38, 0.12);
 
     &__toolbar {
         display: grid;
-        grid-template-columns: minmax(260px, 1fr) 140px 170px 150px;
+        grid-template-columns: minmax(260px, 1fr) 170px 150px;
         gap: 12px;
         margin-bottom: 16px;
 
@@ -208,7 +208,7 @@ $download-admin-hover-shadow: 0 24px 60px rgba(19, 24, 38, 0.12);
 }
 
 .downloadsales-table {
-    --admin-table-min-width: 1040px;
+    --admin-table-min-width: 920px;
 
     tbody {
         tr:hover {
@@ -290,9 +290,21 @@ $download-admin-hover-shadow: 0 24px 60px rgba(19, 24, 38, 0.12);
     }
 
     &__amount {
+        display: grid;
+        gap: 4px;
         color: $download-admin-text;
         font-size: 13px;
         font-weight: 900;
+
+        strong {
+            font-size: 13px;
+        }
+
+        small {
+            color: $download-admin-muted;
+            font-size: 12px;
+            font-weight: 800;
+        }
     }
 }
 
@@ -319,27 +331,6 @@ $download-admin-hover-shadow: 0 24px 60px rgba(19, 24, 38, 0.12);
     &--failed {
         background: #fee2e2;
         color: #991b1b;
-    }
-}
-
-.downloadsales-type {
-    display: inline-grid;
-    place-items: center;
-    min-height: 30px;
-    min-width: 74px;
-    padding: 0 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 900;
-
-    &--style {
-        background: #eff6ff;
-        color: #1d4ed8;
-    }
-
-    &--demo {
-        background: #f5f3ff;
-        color: #6d28d9;
     }
 }
 

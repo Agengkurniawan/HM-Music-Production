@@ -34,6 +34,7 @@ class HeaderNotificationFactory
                     "{$style->name} is available in {$style->category}.",
                     route('stylesampling', ['type' => 'style', 'category' => $style->category]),
                     $style->updated_at,
+                    'style:'.$style->id.':'.($style->updated_at?->getTimestamp()),
                 ));
             });
 
@@ -57,6 +58,7 @@ class HeaderNotificationFactory
                     "{$user->name} has a pending account state.",
                     route('admin.usermanagement'),
                     $user->created_at,
+                    'admin:customer:'.$user->id.':'.$user->status.':'.($user->updated_at?->getTimestamp()),
                 ));
             });
 
@@ -82,6 +84,7 @@ class HeaderNotificationFactory
                     "{$request->order_reference} from {$customerName} for {$request->product_name}.",
                     route('admin.sampling-requests'),
                     $request->updated_at,
+                    'admin:sampling:'.$request->id.':'.$request->status.':'.$request->payment_status.':'.($request->updated_at?->getTimestamp()),
                 ));
             });
 
@@ -99,6 +102,7 @@ class HeaderNotificationFactory
                     "{$customerName} has a legacy pending {$subscription->package} record.",
                     route('admin.subcription'),
                     $subscription->created_at,
+                    'admin:subscription:'.$subscription->id.':'.$subscription->status.':'.($subscription->updated_at?->getTimestamp()),
                 ));
             });
 
@@ -114,6 +118,7 @@ class HeaderNotificationFactory
                     "{$payment->reference} for {$payment->customer_name} is still pending.",
                     route('admin.subcription'),
                     $payment->created_at,
+                    'admin:payment:'.$payment->id.':'.$payment->status.':'.($payment->updated_at?->getTimestamp()),
                 ));
             });
 
@@ -126,6 +131,7 @@ class HeaderNotificationFactory
                 "{$todayDownloads} style file downloads have been recorded today.",
                 route('admin.downloadsales'),
                 now(),
+                'admin:downloads:today:'.today()->toDateString().":{$todayDownloads}",
             ));
         }
 
@@ -146,6 +152,7 @@ class HeaderNotificationFactory
                         "{$request->product_name} has a delivery link from the admin.",
                         route('stylesampling', ['type' => 'sampling']),
                         $request->delivered_at ?: $request->updated_at,
+                        'customer:sampling-ready:'.$request->id.':'.$request->status.':'.(($request->delivered_at ?: $request->updated_at)?->getTimestamp()),
                     ));
 
                     return;
@@ -158,6 +165,7 @@ class HeaderNotificationFactory
                         "{$request->product_name} is being prepared by the admin team.",
                         route('stylesampling', ['type' => 'sampling']),
                         $request->updated_at,
+                        'customer:sampling-processing:'.$request->id.':'.$request->status.':'.($request->updated_at?->getTimestamp()),
                     ));
 
                     return;
@@ -172,6 +180,7 @@ class HeaderNotificationFactory
                         "{$fileName} was uploaded for {$request->product_name}.",
                         route('stylesampling', ['type' => 'sampling']),
                         $request->n27_uploaded_at ?: $request->updated_at,
+                        'customer:sampling-uploaded:'.$request->id.':'.$request->status.':'.(($request->n27_uploaded_at ?: $request->updated_at)?->getTimestamp()),
                     ));
 
                     return;
@@ -184,6 +193,7 @@ class HeaderNotificationFactory
                         "{$request->order_reference} will continue after payment is completed.",
                         route('stylesampling', ['type' => 'sampling']),
                         $request->updated_at,
+                        'customer:sampling-payment:'.$request->id.':'.$request->payment_status.':'.($request->updated_at?->getTimestamp()),
                     ));
                 }
             });
@@ -200,6 +210,7 @@ class HeaderNotificationFactory
                 'Unlock STY downloads. Expansion sampling stays by request per pack.',
                 route('subcription'),
                 now()->subMinute(),
+                'customer:subscription-available:'.$user->id,
             ));
 
             return;
@@ -212,6 +223,7 @@ class HeaderNotificationFactory
                 "{$subscription->package} expires {$subscription->expires_at->diffForHumans()}.",
                 route('subcription'),
                 $subscription->expires_at,
+                'customer:subscription-ending:'.$subscription->id.':'.($subscription->expires_at?->toDateString()),
             ));
         }
     }
@@ -222,8 +234,10 @@ class HeaderNotificationFactory
         string $message,
         string $url,
         ?CarbonInterface $date = null,
+        ?string $key = null,
     ): array {
         return [
+            'key' => $key ?: sha1($type.'|'.$title.'|'.$message.'|'.$url),
             'type' => $type,
             'title' => $title,
             'message' => $message,

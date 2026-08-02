@@ -46,7 +46,9 @@
 
     <div class="hall-first">
         <div class="sidebar-header">
-            <div class="logo">HM</div>
+            <div class="logo">
+                <img src="{{ asset('img/logo-hm-transparent.png') }}" alt="HM Music">
+            </div>
 
             <div>
                 <h2>HM Music</h2>

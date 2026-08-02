@@ -18,7 +18,7 @@
                     <div>
                         <span>Yamaha Style Sampling Backoffice</span>
                         <h1>N27 Sampling Requests</h1>
-                        <p>Verify the sampling voice pack size, keep the sampling price at Rp 750.000, then process the customer .n27 file in Yamaha Expansion Manager and send the final Google Drive link.</p>
+                        <p>Verify the sampling voice pack size, keep the sampling price at Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }}, then process the customer .n27 file in Yamaha Expansion Manager and send the final Google Drive link.</p>
                     </div>
                     <strong>By Request Workflow</strong>
                 </div>

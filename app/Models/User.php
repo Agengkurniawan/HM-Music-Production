@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\CustomerResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'email_verified_at', 'password', 'role', 'status', 'plan', 'last_activity', 'profile_photo_path'])]
+#[Fillable(['name', 'email', 'google_id', 'facebook_id', 'email_verified_at', 'password', 'role', 'status', 'plan', 'last_activity', 'profile_photo_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +31,26 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function hasSocialLogin(): bool
+    {
+        return filled($this->google_id) || filled($this->facebook_id);
+    }
+
+    public function socialLoginProviderLabel(): ?string
+    {
+        return match (true) {
+            filled($this->google_id) && filled($this->facebook_id) => 'Google / Facebook',
+            filled($this->google_id) => 'Google',
+            filled($this->facebook_id) => 'Facebook',
+            default => null,
+        };
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new CustomerResetPasswordNotification($token));
     }
 
     public function getProfilePhotoUrlAttribute(): string
@@ -88,7 +109,10 @@ class User extends Authenticatable
 
     public function activeSubscription()
     {
-        return $this->hasOne(Subscription::class)->where('status', 'Active')->latestOfMany();
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'Active')
+            ->orderByDesc('expires_at')
+            ->orderByDesc('id');
     }
 
     public function latestSubscription()

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\HeaderNotificationFactory;
+use App\Support\HeaderNotificationReadState;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,8 +23,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('components.header', function ($view): void {
-            $notifications = app(HeaderNotificationFactory::class)
+            $allNotifications = app(HeaderNotificationFactory::class)
                 ->forCustomer(auth()->user());
+            $notifications = app(HeaderNotificationReadState::class)
+                ->unread($allNotifications, auth()->user());
 
             $view->with([
                 'headerNotifications' => $notifications,
@@ -32,8 +35,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('components.admin-header', function ($view): void {
-            $notifications = app(HeaderNotificationFactory::class)
+            $allNotifications = app(HeaderNotificationFactory::class)
                 ->forAdmin();
+            $notifications = app(HeaderNotificationReadState::class)
+                ->unread($allNotifications, auth()->user());
 
             $view->with([
                 'headerNotifications' => $notifications,

@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'customer.access' => EnsureCustomerAccess::class,
             'verified.admin' => EnsureVerifiedAdmin::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'payment/midtrans/notification',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

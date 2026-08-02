@@ -11,7 +11,10 @@ class DownloadSalesController extends Controller
     public function index(): View
     {
         return view('layouts.admin.admin-downloadsales', [
-            'downloads' => DownloadSale::with(['user', 'styleSampling'])->latest('downloaded_at')->get(),
+            'downloads' => DownloadSale::with(['user', 'styleSampling'])
+                ->where('download_type', 'style')
+                ->latest('downloaded_at')
+                ->get(),
         ]);
     }
 }

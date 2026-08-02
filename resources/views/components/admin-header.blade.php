@@ -76,6 +76,7 @@
             <a href="javascript:void(0);"
                 id="openNotification"
                 data-notification-toggle
+                data-notification-count="{{ $headerNotificationCount }}"
                 aria-controls="notificationPanel"
                 aria-expanded="false"
                 aria-label="Open admin notifications">
@@ -85,7 +86,7 @@
                 </svg>
 
                 @if($headerNotificationCount > 0)
-                    <p>{{ $headerNotificationBadge }}</p>
+                    <p data-notification-badge data-count="{{ $headerNotificationCount }}">{{ $headerNotificationBadge }}</p>
                 @endif
             </a>
         </div>

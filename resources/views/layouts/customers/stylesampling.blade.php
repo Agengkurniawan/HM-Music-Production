@@ -32,7 +32,7 @@
                 <div class="style-page">
                     <div class="style-page__header">
                         <div>
-                            <span>{{ $isSamplingView ? 'Sampling Voice Kit' : 'STY Style Library' }}</span>
+                            <span>{{ $isSamplingView ? 'Voice Kit' : 'STY Library' }}</span>
                             <h1>{{ $pageTitle }}</h1>
                             <p>
                                 @if($isSamplingView)
@@ -42,7 +42,7 @@
                                 @elseif($selectedCategory)
                                     Showing {{ $selectedCategory }} styles only. Customer hanya mengunduh file .sty; playback style tidak dibuka di halaman ini.
                                 @else
-                                    Browse all styles, download STY dengan subscription aktif, lalu lihat sampling voice pack yang dibutuhkan setiap style.
+                                    Pilih style, download STY, dan cek voice pack yang sesuai.
                                 @endif
                             </p>
                         </div>
@@ -238,21 +238,34 @@
                                         <div class="sampling-order-card__payment">
                                             <div>
                                                 <strong>Bayar via Midtrans untuk membuka upload N27</strong>
-                                                <span>Checkout sampling Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }} untuk order {{ $request->order_reference }}.</span>
+                                                <span>
+                                                    Checkout sampling Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }} untuk order {{ $request->order_reference }}.
+                                                    @if($request->payment)
+                                                        Setelah menyelesaikan pembayaran sandbox, klik Cek Status Pembayaran agar form upload N27 muncul.
+                                                    @endif
+                                                </span>
                                             </div>
-                                            <button
-                                                type="button"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#samplingMidtransModal"
-                                                data-sampling-payment-action="checkout"
-                                                data-sampling-url="{{ route('sampling-requests.payment', $request) }}"
-                                                data-sampling-reference="{{ $request->order_reference }}"
-                                                data-sampling-product="{{ $samplingOrderTitle }}"
-                                                data-sampling-pack="{{ $samplingOrderPack }}"
-                                                data-sampling-amount="{{ $samplingPaymentAmount }}"
-                                                data-sampling-auto-open="{{ (string) $autoOpenPaymentRequestId === (string) $request->id ? '1' : '0' }}">
-                                                Bayar Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }}
-                                            </button>
+                                            <div class="sampling-order-card__payment-actions">
+                                                @if($request->payment)
+                                                    <form action="{{ route('sampling-requests.payment.sync', $request) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit">Cek Status Pembayaran</button>
+                                                    </form>
+                                                @endif
+                                                <button
+                                                    type="button"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#samplingMidtransModal"
+                                                    data-sampling-payment-action="checkout"
+                                                    data-sampling-url="{{ route('sampling-requests.payment', $request) }}"
+                                                    data-sampling-reference="{{ $request->order_reference }}"
+                                                    data-sampling-product="{{ $samplingOrderTitle }}"
+                                                    data-sampling-pack="{{ $samplingOrderPack }}"
+                                                    data-sampling-amount="{{ $samplingPaymentAmount }}"
+                                                    data-sampling-auto-open="{{ (string) $autoOpenPaymentRequestId === (string) $request->id ? '1' : '0' }}">
+                                                    Bayar Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }}
+                                                </button>
+                                            </div>
                                         </div>
                                     @elseif(! $request->has_n27_file)
                                         <form class="sampling-order-card__upload" action="{{ route('sampling-requests.n27.upload', $request) }}" method="POST" enctype="multipart/form-data">
@@ -318,7 +331,7 @@
                                                 </div>
                                                 <div>
                                                     <span>Total Bayar</span>
-                                                    <strong data-sampling-midtrans-amount>Rp 750.000</strong>
+                                                    <strong data-sampling-midtrans-amount>Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }}</strong>
                                                 </div>
                                             </div>
 

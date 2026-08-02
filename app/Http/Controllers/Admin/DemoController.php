@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\MusicDemo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -13,14 +15,14 @@ class DemoController extends Controller
 {
     public function index(): View
     {
-        $demos = MusicDemo::whereIn('genre', MusicDemo::GENRES)
+        $demos = MusicDemo::whereIn('genre', MusicDemo::genreOptions())
             ->orderByDesc('is_trending')
             ->latest()
             ->get();
 
         return view('layouts.admin.admin-demo', [
             'demos' => $demos,
-            'genres' => MusicDemo::GENRES,
+            'genres' => MusicDemo::genreOptions(),
             'demoSummary' => [
                 'total' => $demos->count(),
                 'published' => $demos->where('status', 'Published')->count(),
@@ -35,60 +37,98 @@ class DemoController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:120'],
-            'youtube_url' => $this->youtubeUrlRules(required: true),
-            'installation_youtube_url' => $this->youtubeUrlRules(required: false),
-            'genre' => ['required', Rule::in(MusicDemo::GENRES)],
-            'bpm' => ['required', 'integer', 'min:1', 'max:300'],
-            'duration' => ['required', 'regex:/^\d{1,3}:[0-5]\d$/'],
+            'youtube_url' => $this->youtubeUrlRules(required: false),
+            'genre' => ['nullable', Rule::in(MusicDemo::genreOptions())],
+            'bpm' => ['nullable', 'integer', 'min:1', 'max:300'],
+            'duration' => ['nullable', 'regex:/^\d{1,3}:[0-5]\d$/'],
             'key_signature' => ['nullable', 'string', 'max:40'],
             'status' => ['required', Rule::in(MusicDemo::STATUSES)],
+            'installation_video' => ['nullable', 'file', 'mimes:mp4', 'max:204800'],
         ]);
+
+        $installationVideo = $request->file('installation_video');
+        if (blank($validated['youtube_url'] ?? null) && ! ($installationVideo instanceof UploadedFile)) {
+            return back()
+                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4.'])
+                ->withInput();
+        }
 
         $demo = new MusicDemo([
             'title' => $validated['title'],
-            'youtube_url' => MusicDemo::normalizeYoutubeUrl($validated['youtube_url']),
-            'installation_youtube_url' => $this->normalizeOptionalYoutubeUrl($validated['installation_youtube_url'] ?? null),
-            'genre' => $validated['genre'],
-            'bpm' => $validated['bpm'],
-            'duration' => $validated['duration'],
+            'youtube_url' => filled($validated['youtube_url'] ?? null)
+                ? MusicDemo::normalizeYoutubeUrl($validated['youtube_url'])
+                : null,
+            'genre' => $validated['genre'] ?? MusicDemo::GENRE_NONE,
+            'bpm' => $validated['bpm'] ?? 0,
+            'duration' => $validated['duration'] ?? '0:00',
             'key_signature' => $validated['key_signature'] ?? null,
             'status' => $validated['status'],
             'is_trending' => $request->boolean('trending'),
         ]);
 
+        if ($installationVideo instanceof UploadedFile) {
+            $demo->installation_video_path = $installationVideo->store('demos/videos', 'public');
+        }
+
         $demo->save();
 
-        return back()->with('success', 'YouTube demo published successfully.');
+        return back()->with('success', 'Demo saved successfully.');
     }
 
     public function update(Request $request, MusicDemo $demo): RedirectResponse
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:120'],
-            'youtube_url' => $this->youtubeUrlRules(required: true),
-            'installation_youtube_url' => $this->youtubeUrlRules(required: false),
-            'genre' => ['required', Rule::in(MusicDemo::GENRES)],
-            'bpm' => ['required', 'integer', 'min:1', 'max:300'],
-            'duration' => ['required', 'regex:/^\d{1,3}:[0-5]\d$/'],
+            'youtube_url' => $this->youtubeUrlRules(required: false),
+            'genre' => ['nullable', Rule::in(MusicDemo::genreOptions())],
+            'bpm' => ['nullable', 'integer', 'min:1', 'max:300'],
+            'duration' => ['nullable', 'regex:/^\d{1,3}:[0-5]\d$/'],
             'key_signature' => ['nullable', 'string', 'max:40'],
             'status' => ['required', Rule::in(MusicDemo::STATUSES)],
+            'installation_video' => ['nullable', 'file', 'mimes:mp4', 'max:204800'],
+            'remove_installation_video' => ['nullable', 'boolean'],
         ]);
+
+        $oldInstallationVideoPath = $demo->installation_video_path;
+        $installationVideo = $request->file('installation_video');
+        $keepsExistingMp4 = filled($demo->installation_video_path) && ! $request->boolean('remove_installation_video');
+
+        if (
+            blank($validated['youtube_url'] ?? null)
+            && ! ($installationVideo instanceof UploadedFile)
+            && ! $keepsExistingMp4
+        ) {
+            return back()
+                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4 sebelum menyimpan.'])
+                ->withInput();
+        }
 
         $demo->fill([
             'title' => $validated['title'],
-            'youtube_url' => MusicDemo::normalizeYoutubeUrl($validated['youtube_url']),
-            'installation_youtube_url' => $this->normalizeOptionalYoutubeUrl($validated['installation_youtube_url'] ?? null),
-            'genre' => $validated['genre'],
-            'bpm' => $validated['bpm'],
-            'duration' => $validated['duration'],
+            'youtube_url' => filled($validated['youtube_url'] ?? null)
+                ? MusicDemo::normalizeYoutubeUrl($validated['youtube_url'])
+                : null,
+            'genre' => $validated['genre'] ?? MusicDemo::GENRE_NONE,
+            'bpm' => $validated['bpm'] ?? 0,
+            'duration' => $validated['duration'] ?? '0:00',
             'key_signature' => $validated['key_signature'] ?? null,
             'status' => $validated['status'],
             'is_trending' => $request->boolean('trending'),
         ]);
 
+        if ($installationVideo instanceof UploadedFile) {
+            $demo->installation_video_path = $installationVideo->store('demos/videos', 'public');
+        } elseif ($request->boolean('remove_installation_video')) {
+            $demo->installation_video_path = null;
+        }
+
         $demo->save();
 
-        return back()->with('success', 'YouTube demo updated successfully.');
+        if ($oldInstallationVideoPath && $oldInstallationVideoPath !== $demo->installation_video_path) {
+            Storage::disk('public')->delete($oldInstallationVideoPath);
+        }
+
+        return back()->with('success', 'Demo updated successfully.');
     }
 
     public function toggleTrending(Request $request, MusicDemo $demo): RedirectResponse
@@ -108,7 +148,13 @@ class DemoController extends Controller
 
     public function destroy(MusicDemo $demo): RedirectResponse
     {
+        $installationVideoPath = $demo->installation_video_path;
+
         $demo->delete();
+
+        if ($installationVideoPath) {
+            Storage::disk('public')->delete($installationVideoPath);
+        }
 
         return back()->with('success', 'Demo deleted successfully.');
     }
@@ -131,8 +177,4 @@ class DemoController extends Controller
         ];
     }
 
-    private function normalizeOptionalYoutubeUrl(?string $url): ?string
-    {
-        return filled($url) ? MusicDemo::normalizeYoutubeUrl($url) : null;
-    }
 }

@@ -8,9 +8,14 @@
             $plans = $plans ?? [];
             $premiumPlan = $plans['premium_monthly'] ?? [
                 'name' => 'Premium Monthly',
-                'price' => 29000,
+                'price' => \App\Models\SiteSetting::DEFAULT_SUBSCRIPTION_PRICE,
                 'period_label' => '/month',
             ];
+            $currentSubscription = $currentSubscription ?? null;
+            $hasActiveSubscription = $hasActiveSubscription ?? false;
+            $premiumActionLabel = auth()->check()
+                ? ($hasActiveSubscription ? 'Extend Plan' : 'Renew STY Access')
+                : 'Register or Renew';
         @endphp
 
         @include('components.sidebar', [
@@ -92,6 +97,20 @@
                             <div class="price">Rp {{ number_format((int) $premiumPlan['price'], 0, ',', '.') }}<span>{{ $premiumPlan['period_label'] }}</span></div>
                             <p class="desc">Unlock premium style downloads. Sampling voice packs remain separate per pack.</p>
 
+                            @if(auth()->check())
+                                <div class="plan-card__status {{ $hasActiveSubscription ? 'is-active' : 'is-expired' }}">
+                                    <strong>{{ $hasActiveSubscription ? 'Premium Active' : 'STY Access Locked' }}</strong>
+                                    <span>
+                                        @if($currentSubscription?->expires_at)
+                                            {{ $hasActiveSubscription ? 'Active until' : 'Expired on' }}
+                                            {{ $currentSubscription->expires_at->format('d M Y') }}
+                                        @else
+                                            {{ $hasActiveSubscription ? 'No expiry date' : 'Renew with your registered email' }}
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
+
                             <ul class="features">
                                 <li class="active">Play demo audio</li>
                                 <li class="active">Browse style catalog</li>
@@ -104,7 +123,7 @@
                                 type="button"
                                 data-bs-toggle="modal"
                                 data-bs-target="#subscriptionPaymentModal">
-                                Test Checkout
+                                {{ $premiumActionLabel }}
                             </button>
                         </div>
                     </div>
@@ -122,7 +141,7 @@
 
                         <article>
                             <strong>N27 Sampling</strong>
-                            <p>Beli sampling voice pack yang dipakai style. Harga Rp 750.000 per pack, lalu upload N27 setelah pembayaran berhasil.</p>
+                            <p>Beli sampling voice pack yang dipakai style. Harga Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }} per pack, lalu upload N27 setelah pembayaran berhasil.</p>
                         </article>
                     </section>
                 </div>

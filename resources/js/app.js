@@ -17,8 +17,93 @@ document.addEventListener("DOMContentLoaded", function () {
         const closeNotification = notificationPanel?.querySelector(
             "[data-notification-close], #closeNotification",
         );
+        const readUrl = notificationPanel?.dataset.notificationReadUrl;
+        const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]',
+        )?.content;
 
         if (!notificationPanel) return;
+
+        const formatNotificationCount = (count) =>
+            count > 9 ? "9+" : String(count);
+
+        const updateNotificationBadge = (nextCount) => {
+            const count = Math.max(Number.parseInt(nextCount, 10) || 0, 0);
+            let badge = openNotification.querySelector(
+                "[data-notification-badge]",
+            );
+
+            openNotification.dataset.notificationCount = String(count);
+
+            if (count === 0) {
+                badge?.remove();
+                return;
+            }
+
+            if (!badge) {
+                badge = document.createElement("p");
+                badge.dataset.notificationBadge = "";
+                openNotification.appendChild(badge);
+            }
+
+            badge.dataset.count = String(count);
+            badge.textContent = formatNotificationCount(count);
+        };
+
+        const decrementNotificationBadge = () => {
+            const currentCount =
+                Number.parseInt(openNotification.dataset.notificationCount, 10) ||
+                Number.parseInt(
+                    openNotification
+                        .querySelector("[data-notification-badge]")
+                        ?.dataset.count,
+                    10,
+                ) ||
+                0;
+
+            updateNotificationBadge(currentCount - 1);
+        };
+
+        const updateEmptyState = () => {
+            const emptyState = notificationPanel.querySelector(
+                "[data-notification-empty]",
+            );
+
+            if (!emptyState) return;
+
+            emptyState.hidden = Boolean(
+                notificationPanel.querySelector("[data-notification-item]"),
+            );
+        };
+
+        const markNotificationRead = (item) => {
+            const notificationKey = item.dataset.notificationKey;
+
+            if (!notificationKey || !readUrl || !csrfToken) {
+                return Promise.resolve();
+            }
+
+            if (item.dataset.notificationReadPending === "1") {
+                return Promise.resolve();
+            }
+
+            item.dataset.notificationReadPending = "1";
+            decrementNotificationBadge();
+            item.remove();
+            updateEmptyState();
+
+            return fetch(readUrl, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: JSON.stringify({ key: notificationKey }),
+            }).catch(() => undefined);
+        };
 
         const setNotificationState = (isActive) => {
             notificationPanel.classList.toggle("active", isActive);
@@ -38,6 +123,36 @@ document.addEventListener("DOMContentLoaded", function () {
             setNotificationState(false);
         });
 
+        notificationPanel
+            .querySelectorAll("[data-notification-item]")
+            .forEach((item) => {
+                item.addEventListener("click", function (event) {
+                    const destination = item.getAttribute("href") || "#";
+                    const shouldStayOnPage =
+                        destination === "#" || destination.startsWith("javascript:");
+                    const isNormalClick =
+                        event.button === 0 &&
+                        !event.metaKey &&
+                        !event.ctrlKey &&
+                        !event.shiftKey &&
+                        !event.altKey &&
+                        !item.target;
+
+                    if (!isNormalClick) {
+                        markNotificationRead(item);
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    markNotificationRead(item).finally(() => {
+                        if (!shouldStayOnPage) {
+                            window.location.href = destination;
+                        }
+                    });
+                });
+            });
+
         document.addEventListener("click", function (event) {
             if (
                 !notificationPanel.contains(event.target) &&
@@ -54,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         setNotificationState(notificationPanel.classList.contains("active"));
+        updateEmptyState();
     });
 });
 
@@ -160,30 +276,40 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        $(`[data-datatable-filter][data-table="#${tableId}"]`).on(
-            "change",
-            function () {
-                const columnIndex = Number.parseInt($(this).data("column"), 10);
-                const value = this.value;
-                const shouldShowAll =
-                    !value || value.toString().toLowerCase() === "all";
+        const applyColumnFilter = (filter) => {
+            const columnIndex = Number.parseInt($(filter).data("column"), 10);
+            const value = filter.value;
+            const shouldShowAll =
+                !value || value.toString().toLowerCase() === "all";
 
-                if (!Number.isInteger(columnIndex)) return;
+            if (!Number.isInteger(columnIndex)) return false;
 
-                dataTable
-                    .column(columnIndex)
-                    .search(
-                        shouldShowAll
-                            ? ""
-                            : `^${$.fn.dataTable.util.escapeRegex(value)}$`,
-                        true,
-                        false,
-                    )
-                    .draw();
-            },
+            dataTable.column(columnIndex).search(
+                shouldShowAll
+                    ? ""
+                    : `^${$.fn.dataTable.util.escapeRegex(value)}$`,
+                true,
+                false,
+            );
+
+            return true;
+        };
+
+        const $columnFilters = $(
+            `[data-datatable-filter][data-table="#${tableId}"]`,
         );
 
-        $(`[data-datatable-date-filter][data-table="#${tableId}"]`).each(
+        $columnFilters.on("change", function () {
+            if (applyColumnFilter(this)) {
+                dataTable.draw();
+            }
+        });
+
+        const $dateFilters = $(
+            `[data-datatable-date-filter][data-table="#${tableId}"]`,
+        );
+
+        $dateFilters.each(
             function () {
                 const columnIndex = Number.parseInt($(this).data("column"), 10);
 
@@ -200,6 +326,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             },
         );
+
+        const hasInitialColumnFilter = $columnFilters
+            .toArray()
+            .some((filter) => applyColumnFilter(filter));
+
+        if (hasInitialColumnFilter || $dateFilters.length) {
+            dataTable.draw();
+        }
     });
 
 });
@@ -245,9 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (document.querySelector("#downloadSalesAccess")) {
         initFilterSelect("#downloadSalesAccess");
-    }
-    if (document.querySelector("#downloadSalesType")) {
-        initFilterSelect("#downloadSalesType");
     }
     if (document.querySelector("#downloadmonth")) {
         initFilterSelect("#downloadmonth");

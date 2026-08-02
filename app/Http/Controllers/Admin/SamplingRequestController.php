@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SamplingRequestController extends Controller
@@ -47,10 +48,18 @@ class SamplingRequestController extends Controller
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $payment = $samplingRequest->payment;
         $samplingPackOption = $samplingRequest->pack_name
             ? StyleSampling::samplingRequestOption($samplingRequest->pack_name)
             : null;
+        $expectedAmount = (int) ($samplingPackOption['price'] ?? StyleSampling::SAMPLING_REQUEST_PRICE);
+
+        if ((int) $validated['amount'] !== $expectedAmount) {
+            throw ValidationException::withMessages([
+                'amount' => 'Sampling payment amount must be Rp '.number_format($expectedAmount, 0, ',', '.').'.',
+            ]);
+        }
+
+        $payment = $samplingRequest->payment;
         $paymentPackage = $samplingPackOption['label'] ?? $samplingRequest->product_name;
 
         if ($payment) {

@@ -28,11 +28,7 @@
     <div class="hall-first">
         <div class="sidebar-header">
             <div class="logo">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3 14v-2a9 9 0 0 1 18 0v2" />
-                    <path d="M5 14h4v7H5z" />
-                    <path d="M15 14h4v7h-4z" />
-                </svg>
+                <img src="{{ asset('img/logo-hm-transparent.png') }}" alt="HM Music">
             </div>
 
             <div>

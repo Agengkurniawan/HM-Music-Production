@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function index()
     {
         $publishedStyles = StyleSampling::published();
-        $publishedDemos = MusicDemo::published()->withYoutubeVideo();
+        $publishedDemos = MusicDemo::published()->withPlayableMedia();
         $currentUser = Auth::user();
         $activeSubscription = $currentUser?->activeSubscription()->first();
         $hasPremiumAccess = $activeSubscription !== null && (
@@ -35,21 +35,19 @@ class DashboardController extends Controller
             'demo_progress' => min(100, (int) round(($demoPlays / max($demoLimit, 1)) * 100)),
         ];
 
-        $colors = ['#f97316', '#2563eb', '#0f766e', '#7c3aed'];
         $demos = MusicDemo::published()
-            ->withYoutubeVideo()
+            ->withPlayableMedia()
             ->orderByDesc('is_trending')
             ->latest()
             ->take(4)
             ->get()
             ->values()
-            ->map(fn (MusicDemo $demo, int $index) => [
+            ->map(fn (MusicDemo $demo) => [
                 'title' => $demo->title,
-                'genre' => $demo->genre,
-                'bpm' => $demo->bpm,
-                'duration' => $demo->duration,
-                'source' => 'YouTube',
-                'color' => $colors[$index] ?? '#2563eb',
+                'genre' => $demo->display_genre,
+                'bpm' => $demo->display_bpm,
+                'duration' => $demo->display_duration,
+                'source' => $demo->youtube_video_id ? 'YouTube' : 'MP4',
                 'img' => $demo->thumbnail_src,
             ]);
 

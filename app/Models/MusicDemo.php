@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class MusicDemo extends Model
 {
+    public const GENRE_NONE = 'None';
+
     public const GENRES = ['Dangdut', 'Campursari', 'Gamelan'];
 
     public const STATUSES = ['Draft', 'Published'];
@@ -20,7 +23,7 @@ class MusicDemo extends Model
         'status',
         'is_trending',
         'youtube_url',
-        'installation_youtube_url',
+        'installation_video_path',
         'plays_count',
     ];
 
@@ -43,6 +46,26 @@ class MusicDemo extends Model
         return $query
             ->whereNotNull('youtube_url')
             ->where('youtube_url', '<>', '');
+    }
+
+    public function scopeWithPlayableMedia(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query): void {
+            $query
+                ->where(function (Builder $query): void {
+                    $query->whereNotNull('youtube_url')
+                        ->where('youtube_url', '<>', '');
+                })
+                ->orWhere(function (Builder $query): void {
+                    $query->whereNotNull('installation_video_path')
+                        ->where('installation_video_path', '<>', '');
+                });
+        });
+    }
+
+    public static function genreOptions(): array
+    {
+        return [self::GENRE_NONE, ...self::GENRES];
     }
 
     public static function extractYoutubeVideoId(?string $url): ?string
@@ -98,16 +121,28 @@ class MusicDemo extends Model
             : null;
     }
 
-    public function getInstallationYoutubeVideoIdAttribute(): ?string
+    public function getInstallationVideoUrlAttribute(): ?string
     {
-        return self::extractYoutubeVideoId($this->installation_youtube_url);
+        return $this->installation_video_path
+            ? Storage::disk('public')->url($this->installation_video_path)
+            : null;
     }
 
-    public function getInstallationYoutubeEmbedUrlAttribute(): ?string
+    public function getDisplayGenreAttribute(): string
     {
-        return $this->installation_youtube_video_id
-            ? 'https://www.youtube-nocookie.com/embed/' . $this->installation_youtube_video_id
-            : null;
+        return $this->genre ?: self::GENRE_NONE;
+    }
+
+    public function getDisplayBpmAttribute(): string
+    {
+        return $this->bpm > 0 ? $this->bpm.' BPM' : self::GENRE_NONE;
+    }
+
+    public function getDisplayDurationAttribute(): string
+    {
+        return filled($this->duration) && $this->duration !== '0:00'
+            ? $this->duration
+            : self::GENRE_NONE;
     }
 
     public function getThumbnailSrcAttribute(): string

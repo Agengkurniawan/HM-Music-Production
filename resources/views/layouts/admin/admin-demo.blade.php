@@ -10,6 +10,7 @@
 
             @php
                 $genres = $genres ?? \App\Models\MusicDemo::GENRES;
+                $noneGenre = \App\Models\MusicDemo::GENRE_NONE;
                 $demos = $demos ?? collect();
                 $summary = $demoSummary ?? [
                     'total' => $demos->count(),
@@ -105,12 +106,13 @@
                         </div>
                         <div class="demo-table">
                             <div class="admin-datatable demo-table__datatables">
-                                <table id="adminDemoTable" class="table align-middle admin-datatable__table admin-demo__table js-admin-datatable" data-search="#demoSearchInput" data-unsortable="5">
+                                <table id="adminDemoTable" class="table align-middle admin-datatable__table admin-demo__table js-admin-datatable" data-search="#demoSearchInput" data-unsortable="6">
                                     <thead>
                                         <tr>
                                             <th>Demo</th>
                                             <th>Genre / BPM</th>
                                             <th>YouTube</th>
+                                            <th>MP4</th>
                                             <th>Trending</th>
                                             <th>Status</th>
                                             <th>Actions</th>
@@ -128,28 +130,29 @@
                                                         @if($demo->youtube_video_id)
                                                             <a href="{{ $demo->youtube_url }}" target="_blank" rel="noopener">Watch on YouTube</a>
                                                         @else
-                                                            <small class="admin-demo-table__missing">Add a YouTube URL</small>
+                                                            <small class="admin-demo-table__missing">No YouTube URL</small>
                                                         @endif
 
-                                                        @if($demo->installation_youtube_video_id)
-                                                            <a href="{{ $demo->installation_youtube_url }}" target="_blank" rel="noopener">Installation video</a>
-                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td data-search="{{ $demo->genre }}">
+                                            <td data-search="{{ $demo->display_genre }}">
                                                 <div class="admin-demo-table__meta">
-                                                    <span class="admin-demo-table__genre">{{ $demo->genre }}</span>
-                                                    <span class="admin-demo-table__bpm">{{ $demo->bpm }} BPM</span>
+                                                    <span class="admin-demo-table__genre">{{ $demo->display_genre }}</span>
+                                                    <span class="admin-demo-table__bpm">{{ $demo->display_bpm }}</span>
                                                 </div>
                                             </td>
                                             <td>
                                                 <span class="admin-demo-table__youtube {{ $demo->youtube_video_id ? 'admin-demo-table__youtube--connected' : '' }}">
                                                     {{ $demo->youtube_video_id ? 'Connected' : 'Missing URL' }}
                                                 </span>
-                                                <span class="admin-demo-table__youtube {{ $demo->installation_youtube_video_id ? 'admin-demo-table__youtube--connected' : '' }}">
-                                                    {{ $demo->installation_youtube_video_id ? 'Installation' : 'No Install' }}
-                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($demo->installation_video_url)
+                                                    <a class="admin-demo-table__media admin-demo-table__media--connected" href="{{ $demo->installation_video_url }}" target="_blank" rel="noopener">MP4 Ready</a>
+                                                @else
+                                                    <span class="admin-demo-table__media">No MP4</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <form class="admin-demo-table__trend-form" action="{{ route('admin.demo.trending', $demo) }}" method="POST">
@@ -174,9 +177,10 @@
                                                         data-demo-action="edit"
                                                         data-demo-title="{{ $demo->title }}"
                                                         data-demo-youtube-url="{{ $demo->youtube_url }}"
-                                                        data-demo-installation-youtube-url="{{ $demo->installation_youtube_url }}"
-                                                        data-demo-genre="{{ $demo->genre }}"
-                                                        data-demo-bpm="{{ $demo->bpm }}"
+                                                        data-demo-has-installation-video="{{ $demo->installation_video_path ? '1' : '0' }}"
+                                                        data-demo-installation-video-url="{{ $demo->installation_video_url }}"
+                                                        data-demo-genre="{{ $demo->genre === $noneGenre ? '' : $demo->genre }}"
+                                                        data-demo-bpm="{{ $demo->bpm > 0 ? $demo->bpm : '' }}"
                                                         data-demo-duration="{{ $demo->duration }}"
                                                         data-demo-key-signature="{{ $demo->key_signature }}"
                                                         data-demo-status="{{ $demo->status }}"
@@ -228,7 +232,9 @@
             const form = modal.querySelector('form');
             const title = modal.querySelector('[data-demo-edit-title]');
             const youtubeUrl = modal.querySelector('[data-demo-edit-youtube-url]');
-            const installationYoutubeUrl = modal.querySelector('[data-demo-edit-installation-youtube-url]');
+            const installationVideo = modal.querySelector('[data-demo-edit-installation-video]');
+            const installationStatus = modal.querySelector('[data-demo-edit-installation-status]');
+            const removeInstallation = modal.querySelector('[data-demo-edit-remove-installation]');
             const genre = modal.querySelector('[data-demo-edit-genre]');
             const bpm = modal.querySelector('[data-demo-edit-bpm]');
             const duration = modal.querySelector('[data-demo-edit-duration]');
@@ -240,7 +246,16 @@
             if (form && button.dataset.demoDeleteUrl) form.action = button.dataset.demoDeleteUrl;
             if (title) title.value = button.dataset.demoTitle || '';
             if (youtubeUrl) youtubeUrl.value = button.dataset.demoYoutubeUrl || '';
-            if (installationYoutubeUrl) installationYoutubeUrl.value = button.dataset.demoInstallationYoutubeUrl || '';
+            if (installationVideo) installationVideo.value = '';
+            if (installationStatus) {
+                installationStatus.textContent = button.dataset.demoHasInstallationVideo === '1'
+                    ? 'Current MP4 video is ready. Upload a new file to replace it.'
+                    : 'No MP4 video yet. Upload one to show the MP4 video button.';
+            }
+            if (removeInstallation) {
+                removeInstallation.checked = false;
+                removeInstallation.disabled = button.dataset.demoHasInstallationVideo !== '1';
+            }
             if (genre) genre.value = button.dataset.demoGenre || '';
             if (bpm) bpm.value = button.dataset.demoBpm || '';
             if (duration) duration.value = button.dataset.demoDuration || '';

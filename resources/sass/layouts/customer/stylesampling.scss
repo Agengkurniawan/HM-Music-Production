@@ -39,10 +39,10 @@ $style-rose: #e11d48;
         justify-content: space-between;
         gap: 18px;
         padding: 22px;
-        border: 1px solid rgba(124, 58, 237, 0.16);
+        border: 1px solid rgba(37, 99, 235, 0.14);
         border-radius: 8px;
         background:
-            linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(245, 158, 11, 0.1)),
+            linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(15, 118, 110, 0.08)),
             #ffffff;
         box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
 
@@ -52,8 +52,8 @@ $style-rose: #e11d48;
             align-items: center;
             padding: 0 10px;
             border-radius: 999px;
-            background: #f5f3ff;
-            color: $style-violet;
+            background: #eff6ff;
+            color: $style-blue;
             font-size: 12px;
             font-weight: 900;
             text-transform: uppercase;
@@ -697,6 +697,17 @@ $style-rose: #e11d48;
             white-space: nowrap;
         }
     }
+
+    &__payment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+
+        form {
+            margin: 0;
+        }
+    }
 }
 
 #samplingMidtransModal {
@@ -1119,6 +1130,11 @@ $style-rose: #e11d48;
             button {
                 width: 100%;
             }
+        }
+
+        &__payment-actions {
+            width: 100%;
+            flex-direction: column;
         }
     }
 
