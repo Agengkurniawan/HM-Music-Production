@@ -83,20 +83,20 @@
                         <label>
                             Mode
                             <select name="midtrans_is_production">
-                                <option value="0" @selected(old('midtrans_is_production', $settings['midtrans_is_production']) === '0')>Sandbox</option>
+                                <option value="0" @selected(old('midtrans_is_production', $settings['midtrans_is_production']) === '0')>Sandbox (digunakan sekarang)</option>
                                 <option value="1" @selected(old('midtrans_is_production', $settings['midtrans_is_production']) === '1')>Production</option>
                             </select>
                         </label>
 
                         <label>
                             Midtrans Server Key
-                            <input type="password" name="merchant_key" value="{{ old('merchant_key', $settings['merchant_key']) }}" placeholder="Mid-server-...">
+                            <input type="password" name="midtrans_server_key" value="{{ old('midtrans_server_key', $settings['midtrans_server_key'] ?: $settings['merchant_key']) }}" placeholder="SB-Mid-server-...">
                             <small>Dipakai untuk membuat transaksi dan cek status pembayaran.</small>
                         </label>
 
                         <label>
                             Midtrans Client Key
-                            <input type="password" name="midtrans_client_key" value="{{ old('midtrans_client_key', $settings['midtrans_client_key']) }}" placeholder="Mid-client-...">
+                            <input type="password" name="midtrans_client_key" value="{{ old('midtrans_client_key', $settings['midtrans_client_key']) }}" placeholder="SB-Mid-client-...">
                             <small>Dipakai untuk validasi konfigurasi Midtrans.</small>
                         </label>
                     </section>

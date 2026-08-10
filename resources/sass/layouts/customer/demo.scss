@@ -1,7 +1,7 @@
 $demo-text: #111827;
 $demo-muted: #64748b;
 $demo-border: #e2e8f0;
-$demo-blue: #2563eb;
+$demo-blue: #6d28d9;
 $demo-violet: #7c3aed;
 $demo-green: #16a34a;
 $demo-amber: #f59e0b;
@@ -25,54 +25,84 @@ $demo-amber: #f59e0b;
     .sectionprofil-6 {
         width: 100%;
         margin-top: 10px;
+        padding: 0 10px 40px;
     }
 }
 
 .demo-section {
-    padding: 10px 25px 20px 10px;
     color: $demo-text;
 
     &__header {
+        position: relative;
+        overflow: hidden;
         margin-bottom: 18px;
-        padding: 22px;
-        border: 1px solid rgba(37, 99, 235, 0.14);
-        border-radius: 8px;
-        background:
-            linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(22, 163, 74, 0.08)),
-            #ffffff;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        padding: 28px 30px 28px 34px;
+        border: 1px solid #e9d5ff;
+        border-radius: 14px;
+        background: #faf5ff;
+        box-shadow:
+            0 16px 40px rgba(76, 29, 149, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        gap: 20px;
+        gap: 28px;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 18px auto 18px 0;
+            width: 4px;
+            border-radius: 0 999px 999px 0;
+            background: linear-gradient(135deg, #9333ea, #ec4899);
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: -46px;
+            right: 24%;
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            background: rgba(236, 72, 153, 0.055);
+            pointer-events: none;
+        }
+
+        > div:first-child {
+            min-width: 0;
+        }
 
         span {
             display: inline-flex;
-            min-height: 26px;
+            min-height: 28px;
             align-items: center;
-            padding: 0 10px;
+            padding: 0 11px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: $demo-blue;
-            font-size: 12px;
+            border: 1px solid #e9d5ff;
+            background: #ffffff;
+            color: #7e22ce;
+            font-size: 11px;
             font-weight: 900;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
         }
 
         h1 {
-            margin: 12px 0 8px;
-            color: $demo-text;
-            font-size: 32px;
-            font-weight: 900;
-            line-height: 1.1;
+            margin: 13px 0 9px;
+            color: #2e1065;
+            font-size: clamp(28px, 3vw, 36px);
+            font-weight: 950;
+            letter-spacing: -0.025em;
+            line-height: 1.08;
         }
 
         p {
-            max-width: 720px;
+            max-width: 680px;
             margin: 0;
-            color: #475569;
-            font-size: 15px;
-            line-height: 1.6;
+            color: #5f6574;
+            font-size: 14px;
+            line-height: 1.65;
         }
     }
 
@@ -80,33 +110,67 @@ $demo-amber: #f59e0b;
         flex: 0 0 auto;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 9px;
+        padding: 6px;
+        border: 1px solid #ede9fe;
+        border-radius: 11px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 8px 22px rgba(76, 29, 149, 0.06);
     }
 
     &__primary,
     &__secondary {
-        min-height: 42px;
+        min-height: 40px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: 0 16px;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 900;
         text-decoration: none;
         white-space: nowrap;
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease,
+            background 0.2s ease,
+            color 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+
+        &:focus-visible {
+            outline: 3px solid rgba(147, 51, 234, 0.16);
+            outline-offset: 2px;
+        }
     }
 
     &__primary {
-        background: linear-gradient(135deg, $demo-blue, $demo-violet);
+        border: 1px solid transparent;
+        background: linear-gradient(135deg, #9333ea, #ec4899);
         color: #ffffff;
-        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+        box-shadow: 0 10px 22px rgba(147, 51, 234, 0.2);
+
+        &:hover {
+            background: linear-gradient(135deg, #7e22ce, #db2777);
+            color: #ffffff;
+            box-shadow: 0 14px 27px rgba(147, 51, 234, 0.27);
+        }
     }
 
     &__secondary {
-        border: 1px solid rgba(37, 99, 235, 0.22);
-        background: #ffffff;
-        color: $demo-blue;
+        border: 1px solid #d8b4fe;
+        background: #faf5ff;
+        color: #7e22ce;
+
+        &:hover {
+            border-color: #e879f9;
+            background: #fdf2f8;
+            color: #be185d;
+            box-shadow: 0 8px 18px rgba(109, 40, 217, 0.1);
+        }
     }
 
     &__empty {
@@ -143,14 +207,15 @@ $demo-amber: #f59e0b;
                 transform 0.2s ease;
 
             &:hover {
-                border-color: rgba(37, 99, 235, 0.32);
-                color: $demo-blue;
+                border-color: #94a3b8;
+                background: #f8fafc;
+                color: #111827;
                 transform: translateY(-1px);
             }
 
             &.active {
                 border-color: transparent;
-                background: linear-gradient(135deg, $demo-blue, $demo-violet);
+                background: linear-gradient(135deg, #9333ea, #ec4899);
                 color: #ffffff;
             }
         }
@@ -176,7 +241,7 @@ $demo-amber: #f59e0b;
 
     &:hover,
     &.is-playing {
-        border-color: rgba(37, 99, 235, 0.26);
+        border-color: #cbd5e1;
         box-shadow: 0 24px 56px rgba(15, 23, 42, 0.12);
         transform: translateY(-3px);
     }
@@ -206,7 +271,7 @@ $demo-amber: #f59e0b;
             content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.05), rgba(15, 23, 42, 0.48));
+            background: rgba(15, 23, 42, 0.28);
             pointer-events: none;
         }
     }
@@ -226,8 +291,8 @@ $demo-amber: #f59e0b;
         align-items: center;
         padding: 0 10px;
         border-radius: 999px;
-        background: #dc2626;
-        color: #ffffff;
+        background: rgba(255, 255, 255, 0.92);
+        color: #111827;
         font-size: 12px;
         font-weight: 900;
     }
@@ -242,7 +307,7 @@ $demo-amber: #f59e0b;
         align-items: center;
         padding: 0 10px;
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.76);
+        background: linear-gradient(135deg, #f59e0b, #f97316);
         color: #ffffff;
         font-size: 12px;
         font-weight: 900;
@@ -260,7 +325,7 @@ $demo-amber: #f59e0b;
         border: 0;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.94);
-        color: $demo-blue;
+        color: #9333ea;
         box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
         cursor: pointer;
         transform: translate(-50%, -50%);
@@ -270,7 +335,6 @@ $demo-amber: #f59e0b;
             height: 23px;
             fill: currentColor;
         }
-
     }
 
     &__player {
@@ -312,7 +376,7 @@ $demo-amber: #f59e0b;
     }
 
     &__category {
-        color: $demo-violet;
+        color: #475569;
         font-size: 13px;
         font-weight: 900;
     }
@@ -391,7 +455,7 @@ $demo-amber: #f59e0b;
             }
 
             &:focus-visible {
-                outline: 3px solid rgba(37, 99, 235, 0.2);
+                outline: 3px solid rgba(124, 58, 237, 0.2);
                 outline-offset: 2px;
             }
         }
@@ -399,21 +463,21 @@ $demo-amber: #f59e0b;
 
     &__play {
         border: 0;
-        background: linear-gradient(135deg, $demo-blue, $demo-violet);
+        background: linear-gradient(135deg, #9333ea, #ec4899);
         color: #ffffff;
-        box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
+        box-shadow: 0 12px 22px rgba(124, 58, 237, 0.2);
     }
 
     &__youtube {
-        border: 1px solid #fecaca;
-        background: #fef2f2;
-        color: #b91c1c;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
     }
 
     &__install {
-        border: 1px solid #bbf7d0;
-        background: #f0fdf4;
-        color: #15803d;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
     }
 }
 

@@ -1,8 +1,8 @@
 <div class="sectionprofil">
     @php
         $headerUser = auth()->user();
-        $headerName = $headerUser?->name ?: 'Producer';
-        $headerEmail = $headerUser?->email ?: 'guest@hmmusic.test';
+        $headerName = $headerUser?->name ?: 'Customer';
+        $headerEmail = $headerUser?->email ?: 'loginemailcustomer@gmail.com';
         $headerFirstName = explode(' ', trim($headerName))[0] ?: $headerName;
         $headerAvatarUrl = $headerUser?->profile_photo_url
             ?: \App\Models\User::defaultAvatarUrlFor($headerName, $headerEmail);
@@ -44,6 +44,15 @@
                 <div class="page-header__text">
                     <h1 class="page-header__title">Subscription</h1>
                     <p class="page-header__subtitle">Register, subscribe, and complete sandbox payments through Midtrans.</p>
+                </div>
+            </header>
+            @break
+
+        @case('gatebook')
+            <header class="page-header">
+                <div class="page-header__text">
+                    <h1 class="page-header__title">Gatebook</h1>
+                    <p class="page-header__subtitle">Panduan lengkap menggunakan layanan HM Music dari pendaftaran hingga akses penuh.</p>
                 </div>
             </header>
             @break

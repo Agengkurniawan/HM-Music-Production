@@ -1,5 +1,8 @@
 <?php
 
 return [
-    'admin_email' => env('ADMIN_EMAIL', 'admin@hmmusic.test'),
+    'admin_emails' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', env('ADMIN_EMAILS', 'admin@hmmusic.test'))
+    ))),
 ];

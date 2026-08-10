@@ -10,7 +10,7 @@
 
             @php
                 $requests = $requests ?? collect();
-                $adminErrors = $errors ?? new \Illuminate\Support\ViewErrorBag;
+                $adminErrors = $errors->samplingAction;
             @endphp
 
             <section class="admin-sampling-requests">
@@ -202,6 +202,7 @@
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#samplingPaymentModal"
                                                         data-sampling-payment-action="confirm"
+                                                        data-sampling-request-id="{{ $request->id }}"
                                                         data-sampling-reference="{{ $request->order_reference }}"
                                                         data-sampling-customer="{{ $request->user?->name }}"
                                                         data-sampling-product="{{ $samplingProductName }}"
@@ -262,6 +263,7 @@
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#samplingDeliveryModal"
                                                     data-sampling-action="delivery"
+                                                    data-sampling-request-id="{{ $request->id }}"
                                                     data-sampling-reference="{{ $request->order_reference }}"
                                                     data-sampling-customer="{{ $request->user?->name }}"
                                                     data-sampling-product="{{ $request->product_name }}"
@@ -320,5 +322,12 @@
             notesInput.value = button.dataset.samplingNotes || '';
         });
     });
+
+    @if($errors->adminSamplingPayment->any() && session('admin_sampling_payment_id'))
+    window.addEventListener('load', () => document.querySelector('[data-sampling-payment-action="confirm"][data-sampling-request-id="{{ session('admin_sampling_payment_id') }}"]')?.click());
+    @endif
+    @if($errors->adminSamplingDelivery->any() && session('admin_sampling_delivery_id'))
+    window.addEventListener('load', () => document.querySelector('[data-sampling-action="delivery"][data-sampling-request-id="{{ session('admin_sampling_delivery_id') }}"]')?.click());
+    @endif
 </script>
 @endpush

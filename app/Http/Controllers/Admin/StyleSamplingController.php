@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
@@ -74,9 +75,10 @@ class StyleSamplingController extends Controller
 
     public function update(Request $request, StyleSampling $styleSampling): RedirectResponse
     {
-        $validated = $request->validate([
+        $request->session()->flash('admin_style_edit_id', $styleSampling->id);
+        $validated = $request->validateWithBag('editStyle', [
             'name' => ['required', 'string', 'max:140'],
-            'category' => ['required', 'string', 'max:80'],
+            'category' => ['required', Rule::in(StyleSampling::CATEGORIES)],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -102,7 +104,7 @@ class StyleSamplingController extends Controller
         if ($missing !== []) {
             throw ValidationException::withMessages([
                 'status' => 'Cannot publish yet. Missing: '.implode(', ', $missing).'.',
-            ]);
+            ])->errorBag('styleAction');
         }
 
         $wasPublished = $styleSampling->status === 'Published';
@@ -124,7 +126,18 @@ class StyleSamplingController extends Controller
 
     public function destroy(StyleSampling $styleSampling): RedirectResponse
     {
+        $storedFiles = array_filter([
+            $styleSampling->style_file_path,
+            $styleSampling->audio_path,
+            $styleSampling->preview_path,
+            $styleSampling->cover_image_path,
+        ]);
+
         $styleSampling->delete();
+
+        if ($storedFiles !== []) {
+            Storage::disk('public')->delete($storedFiles);
+        }
 
         return back()->with('success', 'Style sampling deleted successfully.');
     }
@@ -149,10 +162,11 @@ class StyleSamplingController extends Controller
 
     private function notifyCustomersAboutStyle(StyleSampling $styleSampling, string $action): void
     {
-        if ($styleSampling->status !== 'Published') {
-            return;
-        }
+    if ($styleSampling->status !== 'Published') {
+        return;
+    }
 
+    try {
         User::query()
             ->where('role', 'customer')
             ->where('status', '<>', 'Suspended')
@@ -160,5 +174,8 @@ class StyleSamplingController extends Controller
             ->chunkById(100, function ($customers) use ($styleSampling, $action): void {
                 Notification::send($customers, new StyleCatalogUpdated($styleSampling, $action));
             });
+    } catch (\Throwable $e) {
+        report($e);
     }
+}
 }

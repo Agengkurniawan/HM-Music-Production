@@ -19,9 +19,9 @@
                     </div>
                 @endif
 
-                @if($errors->any())
+                @if($errors->adminUserAction->any())
                     <div class="usermanagement-alert usermanagement-alert--error">
-                        {{ $errors->first() }}
+                        {{ $errors->adminUserAction->first() }}
                     </div>
                 @endif
 
@@ -141,6 +141,7 @@
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#userManageModal"
                                                     data-user-action="manage"
+                                                    data-user-id="{{ $user->id }}"
                                                     data-user-name="{{ $user->name }}"
                                                     data-user-email="{{ $user->email }}"
                                                     data-user-plan="{{ $user->plan }}"
@@ -303,5 +304,15 @@
             }
         });
     });
+
+    @if(($errors->adminUserStatus->any() || $errors->adminUserPlan->any() || $errors->adminUserPassword->any()) && session('admin_user_manage_id'))
+    window.addEventListener('load', () => {
+        const button = document.querySelector('[data-user-action="manage"][data-user-id="{{ session('admin_user_manage_id') }}"]');
+        if (!button) return;
+        button.click();
+        const tab = document.getElementById(@json(session('admin_user_manage_tab')));
+        if (tab && window.bootstrap) bootstrap.Tab.getOrCreateInstance(tab).show();
+    });
+    @endif
 </script>
 @endpush

@@ -24,44 +24,108 @@ $sub-green: #16a34a;
 
     .sectionprofil-6 {
         width: 100%;
+        padding: 0 10px 40px;
     }
 
     .pricing {
         display: grid;
         gap: 28px;
-        padding: 32px 40px 60px;
     }
 }
 
 .pricing-header {
-    max-width: 760px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    max-width: none;
+    overflow: hidden;
+    padding: 28px 30px 28px 34px;
+    border: 1px solid #e9d5ff;
+    border-radius: 14px;
+    background: #faf5ff;
+    box-shadow:
+        0 16px 40px rgba(76, 29, 149, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 18px auto 18px 0;
+        width: 4px;
+        border-radius: 0 999px 999px 0;
+        background: linear-gradient(135deg, #9333ea, #ec4899);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: -46px;
+        right: 24%;
+        width: 118px;
+        height: 118px;
+        border-radius: 50%;
+        background: rgba(236, 72, 153, 0.055);
+        pointer-events: none;
+    }
 
     span {
         display: inline-flex;
         min-height: 28px;
         align-items: center;
-        padding: 0 10px;
+        padding: 0 11px;
         border-radius: 999px;
-        background: #f5f3ff;
+        border: 1px solid #e9d5ff;
+        background: #ffffff;
         color: $sub-violet;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
     }
 
     h2 {
-        margin: 14px 0 10px;
-        color: $sub-text;
-        font-size: 40px;
-        font-weight: 900;
+        margin: 13px 0 9px;
+        max-width: 760px;
+        color: #2e1065;
+        font-size: clamp(28px, 3vw, 36px);
+        font-weight: 950;
+        letter-spacing: -0.025em;
         line-height: 1.08;
     }
 
     p {
+        max-width: 800px;
         margin: 0;
-        color: $sub-muted;
-        font-size: 17px;
+        color: #5f6574;
+        font-size: 14px;
         line-height: 1.65;
+    }
+
+    &__mark {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 76px;
+        height: 76px;
+        flex: 0 0 76px;
+        border: 6px solid rgba(255, 255, 255, 0.82);
+        border-radius: 20px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #9333ea, #ec4899);
+        box-shadow: 0 12px 26px rgba(147, 51, 234, 0.2);
+
+        svg {
+            width: 36px;
+            height: 36px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
     }
 }
 
@@ -89,18 +153,28 @@ $sub-green: #16a34a;
 .pricing-wrapper {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
+    gap: 24px;
 }
 
 .plan-card {
     position: relative;
     display: grid;
     gap: 22px;
-    padding: 28px;
+    overflow: visible;
+    padding: 30px;
     border: 1px solid $sub-border;
-    border-radius: 8px;
+    border-radius: 14px;
     background: #ffffff;
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.07);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 54px rgba(15, 23, 42, 0.11);
+    }
 
     .plan-top {
         display: flex;
@@ -112,9 +186,10 @@ $sub-green: #16a34a;
             height: 54px;
             display: grid;
             place-items: center;
-            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             background: #f8fafc;
-            color: $sub-blue;
+            color: #475569;
 
             svg {
                 width: 26px;
@@ -128,7 +203,8 @@ $sub-green: #16a34a;
         }
 
         .premium-icon {
-            background: #f5f3ff;
+            border-color: #e9d5ff;
+            background: #faf5ff;
             color: $sub-violet;
 
             svg {
@@ -173,12 +249,12 @@ $sub-green: #16a34a;
         display: grid;
         gap: 4px;
         padding: 12px 14px;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        background: #eff6ff;
+        border: 1px solid #e9d5ff;
+        border-radius: 10px;
+        background: #faf5ff;
 
         strong {
-            color: #1d4ed8;
+            color: #7e22ce;
             font-size: 13px;
             font-weight: 900;
         }
@@ -190,20 +266,20 @@ $sub-green: #16a34a;
         }
 
         &.is-active {
-            border-color: #bbf7d0;
-            background: #f0fdf4;
+            border-color: #d8b4fe;
+            background: #faf5ff;
 
             strong {
-                color: #15803d;
+                color: #7e22ce;
             }
         }
 
         &.is-expired {
-            border-color: #fed7aa;
-            background: #fff7ed;
+            border-color: #e2e8f0;
+            background: #f8fafc;
 
             strong {
-                color: #c2410c;
+                color: #64748b;
             }
         }
     }
@@ -216,12 +292,38 @@ $sub-green: #16a34a;
         list-style: none;
 
         li {
+            position: relative;
+            padding-left: 27px;
             color: #94a3b8;
             font-size: 15px;
             font-weight: 800;
 
             &.active {
                 color: $sub-text;
+
+                &::before {
+                    content: "✓";
+                    border-color: #d8b4fe;
+                    background: #faf5ff;
+                    color: #9333ea;
+                }
+            }
+
+            &::before {
+                content: "–";
+                position: absolute;
+                left: 0;
+                top: 0;
+                display: grid;
+                place-items: center;
+                width: 19px;
+                height: 19px;
+                border: 1px solid #e2e8f0;
+                border-radius: 50%;
+                background: #f8fafc;
+                color: #94a3b8;
+                font-size: 11px;
+                font-weight: 900;
             }
         }
     }
@@ -234,13 +336,12 @@ $sub-green: #16a34a;
         align-items: center;
         justify-content: center;
         border: 0;
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 15px;
         font-weight: 900;
         text-decoration: none;
         cursor: pointer;
     }
-
 
     .current-btn {
         background: #f3f4f6;
@@ -252,26 +353,47 @@ $sub-green: #16a34a;
         background: linear-gradient(135deg, $sub-violet, $sub-pink);
         color: #ffffff;
         box-shadow: 0 14px 28px rgba(147, 51, 234, 0.2);
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 34px rgba(147, 51, 234, 0.28);
+        }
     }
 
     &.premium {
         border-color: rgba(147, 51, 234, 0.36);
+        background: #fefcff;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -1px 14px auto;
+            height: 5px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #9333ea, #ec4899);
+            box-shadow: 0 2px 5px rgba(147, 51, 234, 0.1);
+        }
     }
 
     .badge {
         position: absolute;
-        top: -14px;
+        z-index: 2;
+        top: 2px;
         left: 50%;
-        min-height: 28px;
+        min-height: 30px;
         display: inline-flex;
         align-items: center;
-        padding: 0 16px;
+        padding: 0 18px;
         border-radius: 999px;
         background: linear-gradient(135deg, $sub-violet, $sub-pink);
         color: #ffffff;
         font-size: 12px;
         font-weight: 900;
-        transform: translateX(-50%);
+        box-shadow: 0 0 0 5px rgb(254, 252, 255);
+        transform: translate(-50%, -50%);
     }
 }
 
@@ -287,9 +409,17 @@ $sub-green: #16a34a;
         gap: 10px;
         padding: 20px;
         border: 1px solid $sub-border;
-        border-radius: 8px;
+        border-radius: 12px;
         background: #ffffff;
         box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        transition:
+            border-color 0.2s ease,
+            transform 0.2s ease;
+
+        &:hover {
+            border-color: #d8b4fe;
+            transform: translateY(-2px);
+        }
     }
 
     strong {
@@ -331,4 +461,7 @@ $sub-green: #16a34a;
         font-size: 30px;
     }
 
+    .pricing-header__mark {
+        display: none;
+    }
 }

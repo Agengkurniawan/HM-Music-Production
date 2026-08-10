@@ -16,6 +16,12 @@
             @endphp
 
             <section class="admin-style-sampling">
+                @if(session('success'))
+                    <div class="usermanagement-alert usermanagement-alert--success">{{ session('success') }}</div>
+                @endif
+                @if($errors->styleAction->any())
+                    <div class="usermanagement-alert usermanagement-alert--error">{{ $errors->styleAction->first() }}</div>
+                @endif
                 <div class="style-summary">
                     <article>
                         <div class="style-summary__icon">
@@ -210,6 +216,7 @@
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#styleSamplingEditModal"
                                                     data-style-action="edit"
+                                                    data-style-id="{{ $style->id }}"
                                                     data-style-name="{{ $style->name }}"
                                                     data-style-category="{{ $style->category }}"
                                                     data-style-update-url="{{ route('admin.stylesampling.update', $style) }}">
@@ -299,5 +306,12 @@
             if (editCategory) editCategory.value = button.dataset.styleCategory || '';
         });
     });
+
+    @if($errors->editStyle->any() && session('admin_style_edit_id'))
+    window.addEventListener('load', () => {
+        const button = document.querySelector('[data-style-action="edit"][data-style-id="{{ session('admin_style_edit_id') }}"]');
+        if (button) button.click();
+    });
+    @endif
 </script>
 @endpush

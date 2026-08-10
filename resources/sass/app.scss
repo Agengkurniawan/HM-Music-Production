@@ -7,12 +7,14 @@
 @use "components/modal";
 @use "components/header";
 @use "components/admin-header";
+@use "components/customer-contact";
 
 // customer
 @use "layouts/customer/dashboard";
 @use "layouts/customer/demo";
 @use "layouts/customer/stylesampling";
 @use "layouts/customer/subcription";
+@use "layouts/customer/gatebook";
 
 // admin
 @use "layouts/admin/admin-dashboard";

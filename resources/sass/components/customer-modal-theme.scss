@@ -1,0 +1,166 @@
+$customer-violet: #7c3aed;
+$customer-violet-dark: #6d28d9;
+$customer-pink: #ec4899;
+$customer-ink: #172033;
+$customer-muted: #64748b;
+$customer-line: #e2e8f0;
+
+#forgotPasswordModal,
+#subscriptionPaymentModal,
+#samplingMidtransModal {
+    --bs-modal-margin: 1rem;
+    background: rgba(15, 23, 42, 0.56) !important;
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+
+    .modal-dialog { padding: 10px; }
+
+    .modal-content,
+    .password-reset-modal__content {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba($customer-violet, .14);
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #fdfcff 100%);
+        box-shadow: 0 34px 90px rgba(15, 23, 42, .27);
+
+        &::before {
+            content: "";
+            position: absolute;
+            z-index: 3;
+            inset: 0 0 auto;
+            height: 5px;
+            background: linear-gradient(90deg, $customer-violet, #9333ea, $customer-pink);
+        }
+    }
+
+    .modal-header,
+    .password-reset-modal__header {
+        min-height: 86px;
+        align-items: center;
+        padding: 24px 26px 18px;
+        border: 0;
+        background: linear-gradient(135deg, rgba(245, 243, 255, .92), rgba(253, 242, 248, .72));
+    }
+
+    .modal-eyebrow,
+    .password-reset-modal__header span {
+        margin: 0 0 4px;
+        color: $customer-violet;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+
+    .modal-title,
+    .password-reset-modal__header h2 {
+        margin: 0;
+        color: $customer-ink;
+        font-size: 23px;
+        font-weight: 950;
+        line-height: 1.15;
+    }
+
+    .btn-close,
+    .password-reset-modal__close {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        padding: 0;
+        border: 1px solid #e9d5ff;
+        border-radius: 10px;
+        background-color: rgba(255,255,255,.86);
+        color: $customer-muted;
+        box-shadow: 0 6px 16px rgba(76,29,149,.08);
+        transition: .2s ease;
+
+        &:hover { border-color: #c4b5fd; background-color: #fff; transform: translateY(-1px); }
+    }
+
+    hr { width: 100%; margin: 0; border: 0; border-top: 1px solid #ede9fe; opacity: 1; }
+
+    .modal-body {
+        gap: 16px;
+        padding: 22px 26px;
+    }
+
+    input,
+    select,
+    textarea,
+    .login-form__control {
+        border-color: #d8dce5;
+        border-radius: 10px;
+        background: #f8fafc;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+
+        &:focus,
+        &:focus-within {
+            border-color: $customer-violet;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba($customer-violet, .11);
+            outline: 0;
+        }
+    }
+
+    label { color: #334155; }
+    label small { color: #be123c; font-weight: 750; }
+
+    .modal-summary > div,
+    .sampling-midtrans-summary,
+    .sampling-midtrans-product {
+        border-color: #ddd6fe;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f5f3ff, #fdf2f8);
+    }
+
+    .modal-alert--danger,
+    .login-form__error {
+        border: 1px solid #fecdd3;
+        border-radius: 10px;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .modal-footer,
+    .password-reset-modal__actions {
+        gap: 10px;
+        padding: 18px 26px 24px;
+        border: 0;
+        background: #fff;
+
+        button { min-height: 46px; border-radius: 10px; font-size: 13px; font-weight: 900; transition: .2s ease; }
+        button:first-child { border: 1px solid #d8dce5; background: #fff; color: #475569; &:hover { border-color: #c4b5fd; background: #f5f3ff; color: $customer-violet-dark; } }
+        button:last-child { border: 0; background: linear-gradient(135deg, $customer-violet, $customer-pink); color: #fff; box-shadow: 0 14px 28px rgba($customer-violet,.22); &:hover { transform: translateY(-1px); box-shadow: 0 17px 32px rgba($customer-violet,.29); } }
+    }
+}
+
+#forgotPasswordModal {
+    .password-reset-modal__content { gap: 0; padding: 0; }
+    .password-reset-modal__header { align-items: center; }
+    .password-reset-modal__copy { margin: 0; padding: 22px 26px 14px; color: $customer-muted; line-height: 1.6; }
+    .login-form__field { margin: 0 26px 20px; }
+    .login-form__error { margin: -8px 26px 18px; padding: 11px 13px; }
+    .password-reset-modal__actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .password-reset-modal__mark { width: 48px; height: 48px; flex-basis: 48px; }
+}
+
+#subscriptionPaymentModal {
+    .modal-dialog { max-width: 760px; }
+    .modal-section span { color: $customer-violet; }
+    .modal-file { border-radius: 10px; }
+    .social-register__button { border-radius: 10px; }
+}
+
+@media (max-width: 600px) {
+    #forgotPasswordModal,
+    #subscriptionPaymentModal,
+    #samplingMidtransModal {
+        .modal-dialog { padding: 4px; }
+        .modal-header, .password-reset-modal__header { min-height: 76px; padding: 20px 18px 15px; }
+        .modal-body { padding: 18px; }
+        .modal-footer, .password-reset-modal__actions { padding: 15px 18px 19px; }
+        .modal-title, .password-reset-modal__header h2 { font-size: 20px; }
+    }
+    #forgotPasswordModal { .password-reset-modal__copy { padding: 18px 18px 12px; } .login-form__field { margin: 0 18px 18px; } .login-form__error { margin: -6px 18px 16px; } }
+}

@@ -82,7 +82,7 @@ class SubscriptionController extends Controller
 
         $usesSocialLogin = $request->user()?->hasSocialLogin() ?? false;
 
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('subscriptionCheckout', [
             'name' => ['required', 'string', 'max:120'],
             'email' => [
                 'required',
@@ -95,6 +95,16 @@ class SubscriptionController extends Controller
             'amount' => ['required', 'integer', 'min:0'],
             'method' => ['nullable', 'string', 'max:80'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email belum benar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal harus terdiri dari 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak sama dengan password.',
+            'profile_photo.image' => 'Foto profil harus berupa gambar.',
+            'profile_photo.mimes' => 'Foto profil harus berformat JPG, JPEG, PNG, atau WEBP.',
+            'profile_photo.max' => 'Ukuran foto profil maksimal 2 MB.',
         ]);
 
         $settings = SiteSetting::values();
@@ -109,7 +119,7 @@ class SubscriptionController extends Controller
         if ((int) $validated['amount'] !== $expectedAmount || $validated['package'] !== $expectedPackage) {
             throw ValidationException::withMessages([
                 'amount' => 'Subscription package or amount is not valid. Please refresh the checkout page.',
-            ]);
+            ])->errorBag('subscriptionCheckout');
         }
 
         $existingUser = $this->resolveCheckoutUser($request, $validated);
@@ -119,11 +129,14 @@ class SubscriptionController extends Controller
         $gateway = app(MidtransSnapGateway::class);
 
         [$user, $payment, $subscription] = DB::transaction(function () use ($validated, $profilePhotoPath, $existingUser, $isRenewal, $gateway): array {
+            $lockedUser = $existingUser
+                ? User::query()->lockForUpdate()->findOrFail($existingUser->id)
+                : null;
             $userData = [
                 'name' => $validated['name'],
                 'role' => 'customer',
                 'status' => 'Active',
-                'plan' => $existingUser?->plan ?: 'Free',
+                'plan' => $lockedUser?->plan ?: 'Free',
                 'last_activity' => $isRenewal
                     ? 'Subscription payment started via Midtrans'
                     : 'Subscription registration started via Midtrans',
@@ -133,8 +146,8 @@ class SubscriptionController extends Controller
                 $userData['profile_photo_path'] = $profilePhotoPath;
             }
 
-            if ($existingUser) {
-                $user = $existingUser;
+            if ($lockedUser) {
+                $user = $lockedUser;
                 $user->update($userData);
             } else {
                 $user = User::create([
@@ -142,6 +155,23 @@ class SubscriptionController extends Controller
                     'email' => $validated['email'],
                     'password' => $validated['password'],
                 ]);
+            }
+
+            // A browser retry/double-submit must leave only the newest checkout pending.
+            $pendingSubscriptions = $user->subscriptions()
+                ->where('status', 'Pending')
+                ->lockForUpdate()
+                ->get();
+
+            if ($pendingSubscriptions->isNotEmpty()) {
+                Payment::query()
+                    ->whereIn('subscription_id', $pendingSubscriptions->pluck('id'))
+                    ->where('status', 'Pending')
+                    ->update(['status' => 'Cancelled']);
+
+                Subscription::query()
+                    ->whereIn('id', $pendingSubscriptions->pluck('id'))
+                    ->update(['status' => 'Cancelled']);
             }
 
             $subscription = Subscription::create([
@@ -176,7 +206,7 @@ class SubscriptionController extends Controller
 
             throw ValidationException::withMessages([
                 'method' => $exception->getMessage(),
-            ]);
+            ])->errorBag('subscriptionCheckout');
         } catch (\Throwable $exception) {
             report($exception);
 
@@ -185,7 +215,7 @@ class SubscriptionController extends Controller
 
             throw ValidationException::withMessages([
                 'method' => 'Midtrans checkout belum bisa dibuat. Periksa konfigurasi Server Key dan koneksi payment gateway.',
-            ]);
+            ])->errorBag('subscriptionCheckout');
         }
 
         $request->session()->put('pending_payment_reference', $payment->reference);
@@ -281,7 +311,7 @@ class SubscriptionController extends Controller
             if (! $existingUser || ! $existingUser->is($currentUser)) {
                 throw ValidationException::withMessages([
                     'email' => 'Gunakan email akun yang sedang login untuk memperpanjang subscription.',
-                ]);
+                ])->errorBag('subscriptionCheckout');
             }
         }
 
@@ -292,19 +322,19 @@ class SubscriptionController extends Controller
         if ($existingUser->role !== 'customer') {
             throw ValidationException::withMessages([
                 'email' => 'Email ini tidak dapat dipakai untuk subscription customer.',
-            ]);
+            ])->errorBag('subscriptionCheckout');
         }
 
         if ($existingUser->status === 'Suspended') {
             throw ValidationException::withMessages([
                 'email' => 'Akun ini sedang suspended. Hubungi admin sebelum memperpanjang subscription.',
-            ]);
+            ])->errorBag('subscriptionCheckout');
         }
 
         if (! ($currentUser?->hasSocialLogin() ?? false) && ! Hash::check($validated['password'] ?? '', $existingUser->password)) {
             throw ValidationException::withMessages([
                 'password' => 'Email sudah terdaftar. Masukkan password akun tersebut untuk memperpanjang subscription.',
-            ]);
+            ])->errorBag('subscriptionCheckout');
         }
 
         return $existingUser;

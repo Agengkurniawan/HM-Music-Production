@@ -25,7 +25,7 @@
                     $pageTitle = $isSamplingView
                         ? ($selectedPackLabel ? "{$selectedPackLabel} N27" : 'Sampling Voice Packs')
                         : ($selectedPackLabel ? "{$selectedPackLabel} Styles" : ($selectedCategory ? "{$selectedCategory} Styles" : 'Style Library'));
-                    $downloadErrors = $errors ?? new \Illuminate\Support\ViewErrorBag;
+                    $downloadErrors = $errors->styleDownload;
                     $autoOpenPaymentRequestId = session('sampling_payment_request_id');
                 @endphp
 
@@ -36,7 +36,7 @@
                             <h1>{{ $pageTitle }}</h1>
                             <p>
                                 @if($isSamplingView)
-                                    Beli salah satu sampling voice pack dulu. Setelah pembayaran Midtrans berhasil, upload file .n27 agar admin connect voice kit ke keyboard.
+                                    Beli salah satu sampling voice pack dulu. Setelah pembayaran berhasil, upload file .n27 agar admin dapat menghubungkan voice kit ke keyboard.
                                 @elseif($selectedPackLabel)
                                     Showing styles from {{ $selectedPackLabel }}. Download file STY dengan subscription aktif, lalu beli sampling voice pack yang sesuai bila style membutuhkan voice kit.
                                 @elseif($selectedCategory)
@@ -45,6 +45,13 @@
                                     Pilih style, download STY, dan cek voice pack yang sesuai.
                                 @endif
                             </p>
+                        </div>
+                        <div class="style-page__header-mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 14v-2a9 9 0 0 1 18 0v2" />
+                                <path d="M5 14h4v7H5z" />
+                                <path d="M15 14h4v7h-4z" />
+                            </svg>
                         </div>
                     </div>
 
@@ -107,30 +114,58 @@
                         </div>
                     @endif
 
+                    @if($errors->samplingPayment->any())
+                        <div class="style-page__notice style-page__notice--error">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                            <div><strong>Pembayaran sampling bermasalah</strong><span>{{ $errors->samplingPayment->first() }}</span></div>
+                        </div>
+                    @endif
+
                     @if($isSamplingView)
+                        <section class="sampling-welcome">
+                            <div class="sampling-welcome__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M5 14h4v7H5zM15 14h4v7h-4z"/></svg>
+                            </div>
+                            <div>
+                                <span>Layanan Sampling Keyboard</span>
+                                <h2>Pilih voice pack, kirim N27, lalu kami proses.</h2>
+                                <p>Satu alur sederhana dari pemilihan pack sampai file hasil siap diunduh. Pembelian sampling terpisah dari subscription Style STY.</p>
+                            </div>
+                            <div class="sampling-welcome__steps">
+                                <span><b>1</b>Pilih pack</span><i></i><span><b>2</b>Bayar</span><i></i><span><b>3</b>Upload N27</span><i></i><span><b>4</b>Terima hasil</span>
+                            </div>
+                        </section>
+
                         <div class="sampling-pack-strip">
                             @foreach($samplingPackOptions as $packName => $pack)
                                 <span>
+                                    <b>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</b>
                                     <strong>{{ $pack['short_label'] }}</strong>
-                                    <small>{{ \App\Models\StyleSampling::formatSamplingSize($pack['size_mb']) }} / {{ \App\Models\StyleSampling::formatSamplingPrice($pack['price']) }}</small>
+                                    <small>{{ \App\Models\StyleSampling::formatSamplingSize($pack['size_mb']) }}</small>
                                     <em>{{ count($pack['voice_kits'] ?? []) }} voice kits</em>
+                                    <u>{{ \App\Models\StyleSampling::formatSamplingPrice($pack['price']) }}</u>
                                 </span>
                             @endforeach
                         </div>
 
                         <form class="sampling-request-form" action="{{ route('sampling-requests.store') }}" method="POST" data-sampling-checkout-form>
                             @csrf
+                            @if($errors->samplingRequest->any())
+                                <div class="style-page__notice style-page__notice--error">
+                                    <div><strong>Data request belum benar</strong><span>{{ $errors->samplingRequest->first() }}</span></div>
+                                </div>
+                            @endif
                             <div class="sampling-request-form__header">
                                 <div>
-                                    <span>Beli pack voice, lalu upload N27</span>
-                                    <h2>Beli Sampling Pack</h2>
+                                    <span>Form request baru</span>
+                                    <h2>Pilih Sampling Voice Pack</h2>
                                 </div>
                                 <strong>Harga sampling: Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }}</strong>
                             </div>
 
                             <div class="sampling-request-form__grid">
                                 <label>
-                                    Kebutuhan Pack
+                                    Voice Pack yang Dibutuhkan
                                     <select name="pack_name" required>
                                         @foreach($samplingPackOptions as $packName => $pack)
                                             <option value="{{ $packName }}"
@@ -142,25 +177,25 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('pack_name')<small>{{ $message }}</small>@enderror
+                                    @error('pack_name', 'samplingRequest')<small>{{ $message }}</small>@enderror
                                 </label>
 
                                 <label>
                                     Kapasitas Keyboard (MB)
                                     <input type="number" name="keyboard_storage_mb" min="1" max="4096" value="{{ old('keyboard_storage_mb') }}" placeholder="Contoh: 768">
-                                    @error('keyboard_storage_mb')<small>{{ $message }}</small>@enderror
+                                    @error('keyboard_storage_mb', 'samplingRequest')<small>{{ $message }}</small>@enderror
                                 </label>
                             </div>
 
                             <label>
                                 Catatan Kebutuhan
                                 <textarea name="customer_notes" rows="4" placeholder="Contoh: style yang dipakai HM Dangdut Raya, keyboard saya tersisa 512 MB, mohon connect voice kit yang sesuai.">{{ old('customer_notes') }}</textarea>
-                                @error('customer_notes')<small>{{ $message }}</small>@enderror
+                                @error('customer_notes', 'samplingRequest')<small>{{ $message }}</small>@enderror
                             </label>
 
                             <div class="sampling-request-form__payment" data-sampling-payment-preview>
                                 <div>
-                                    <span data-sampling-preview-label>Sampling Payment</span>
+                                <span data-sampling-preview-label>Ringkasan pilihan</span>
                                     <strong data-sampling-preview-price>Rp 0</strong>
                                 </div>
                                 <p data-sampling-preview-summary>Pilih pack untuk melihat harga dan ukuran sampling.</p>
@@ -170,14 +205,14 @@
                                 Sampling pack berisi voice kit untuk banyak style. Setelah pembayaran, upload file N27 supaya admin connect voice kit pack ini ke keyboard.
                             </div>
 
-                            <button type="submit">Beli Pack & Buka Pembayaran</button>
+                            <button type="submit">Lanjutkan ke Ringkasan Pembayaran</button>
                         </form>
 
                         <div class="sampling-orders">
                             <div class="sampling-orders__header">
                                 <div>
-                                    <span>Customer N27 Workflow</span>
-                                    <h2>Your Sampling Packs</h2>
+                                    <span>Riwayat dan progres</span>
+                                    <h2>Pesanan Sampling Anda</h2>
                                 </div>
                                 <strong>{{ $samplingRequests->count() }} packs</strong>
                             </div>
@@ -211,7 +246,7 @@
                                     </div>
 
                                     <div class="sampling-order-card__meta">
-                                        <span>Payment: {{ $request->payment_status }}</span>
+                                        <span>Pembayaran: {{ $request->payment_status }}</span>
                                         <span>Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }}</span>
                                         @if($request->keyboard_storage_mb)
                                             <span>Keyboard: {{ $request->keyboard_storage_mb }} MB</span>
@@ -229,19 +264,19 @@
                                     @endif
 
                                     <div class="sampling-order-card__steps">
-                                        <span class="{{ $request->payment_status === \App\Models\SamplingRequest::PAYMENT_PAID ? 'is-done' : '' }}">Sampling Paid</span>
-                                        <span class="{{ $request->has_n27_file ? 'is-done' : '' }}">N27 Uploaded</span>
-                                        <span class="{{ $request->is_ready ? 'is-done' : '' }}">Ready Link</span>
+                                        <span class="{{ $request->payment_status === \App\Models\SamplingRequest::PAYMENT_PAID ? 'is-done' : '' }}">Pembayaran</span>
+                                        <span class="{{ $request->has_n27_file ? 'is-done' : '' }}">Upload N27</span>
+                                        <span class="{{ $request->is_ready ? 'is-done' : '' }}">Hasil Siap</span>
                                     </div>
 
                                     @if($request->payment_status !== \App\Models\SamplingRequest::PAYMENT_PAID)
                                         <div class="sampling-order-card__payment">
                                             <div>
-                                                <strong>Bayar via Midtrans untuk membuka upload N27</strong>
+                                                <strong>Selesaikan pembayaran untuk membuka upload N27</strong>
                                                 <span>
-                                                    Checkout sampling Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }} untuk order {{ $request->order_reference }}.
+                                                    Total pembayaran Rp {{ number_format($samplingPaymentAmount, 0, ',', '.') }} untuk pesanan {{ $request->order_reference }}.
                                                     @if($request->payment)
-                                                        Setelah menyelesaikan pembayaran sandbox, klik Cek Status Pembayaran agar form upload N27 muncul.
+                                                        Setelah pembayaran selesai, klik Cek Status Pembayaran agar form upload N27 muncul.
                                                     @endif
                                                 </span>
                                             </div>
@@ -270,6 +305,9 @@
                                     @elseif(! $request->has_n27_file)
                                         <form class="sampling-order-card__upload" action="{{ route('sampling-requests.n27.upload', $request) }}" method="POST" enctype="multipart/form-data">
                                             @csrf
+                                            @if((string) session('sampling_upload_request_id') === (string) $request->id && $errors->samplingUpload->any())
+                                                <small class="sampling-order-card__error">{{ $errors->samplingUpload->first() }}</small>
+                                            @endif
                                             <label>
                                                 Upload Yamaha N27 File
                                                 <input type="file" name="n27_file" accept=".n27" required>
@@ -303,7 +341,7 @@
                             @empty
                                 <div class="style-page__empty">
                                     <strong>No sampling packs yet</strong>
-                                    <span>Beli salah satu sampling pack dulu. Modal Midtrans terbuka setelah submit, lalu upload N27 aktif setelah pembayaran.</span>
+                                    <span>Pilih salah satu sampling pack. Ringkasan pembayaran akan terbuka, lalu upload N27 aktif setelah pembayaran berhasil.</span>
                                 </div>
                             @endforelse
                         </div>
@@ -315,22 +353,23 @@
                                         @csrf
                                         <div class="modal-header">
                                             <div>
-                                                <span class="modal-eyebrow">Midtrans Checkout</span>
-                                                <h2 class="modal-title" id="samplingMidtransModalLabel">Bayar Sampling Pack</h2>
+                                                <span class="modal-eyebrow">Konfirmasi Pesanan</span>
+                                                <h2 class="modal-title" id="samplingMidtransModalLabel">Ringkasan Pembayaran</h2>
                                             </div>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <hr>
                                         <div class="modal-body">
-                                            <p class="modal-context" data-sampling-midtrans-context>Sampling pack checkout</p>
+                                            <p class="modal-context" data-sampling-midtrans-context>Ringkasan pesanan sampling</p>
 
                                             <div class="modal-summary sampling-midtrans-summary">
-                                                <div>
-                                                    <span>Order</span>
+                                                <div class="sampling-midtrans-summary__order">
+                                                    <span>Nomor Pesanan</span>
                                                     <strong data-sampling-midtrans-reference>-</strong>
                                                 </div>
-                                                <div>
-                                                    <span>Total Bayar</span>
+                                                <span class="sampling-midtrans-summary__divider" aria-hidden="true"></span>
+                                                <div class="sampling-midtrans-summary__total">
+                                                    <span>Total Pembayaran</span>
                                                     <strong data-sampling-midtrans-amount>Rp {{ number_format(\App\Models\StyleSampling::SAMPLING_REQUEST_PRICE, 0, ',', '.') }}</strong>
                                                 </div>
                                             </div>
@@ -343,25 +382,18 @@
                                                 <p data-sampling-midtrans-pack>-</p>
                                             </div>
 
-                                            <div class="sampling-midtrans-methods" aria-label="Midtrans payment methods">
-                                                <span>QRIS</span>
-                                                <span>Virtual Account</span>
-                                                <span>E-Wallet</span>
-                                                <span>Kartu Debit/Kredit</span>
-                                            </div>
-
                                             <div class="modal-note sampling-midtrans-note">
-                                                <div>
-                                                    <span>Gateway</span>
-                                                    <strong>Midtrans</strong>
-                                                </div>
-                                                <p>Pembayaran selesai akan membuka upload file .n27 untuk order sampling ini.</p>
+                                                <span class="sampling-midtrans-note__icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+                                                </span>
+                                                <strong>Pesanan Anda siap dilanjutkan</strong>
+                                                <p>Periksa kembali pack dan total pesanan. Setelah pembayaran berhasil, upload file <strong>.n27</strong> akan terbuka otomatis.</p>
                                             </div>
                                         </div>
                                         <hr>
                                         <div class="modal-footer">
-                                            <button type="button" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit">Bayar via Midtrans</button>
+                                            <button type="button" data-bs-dismiss="modal">Kembali</button>
+                                            <button type="submit">Lanjutkan Pembayaran</button>
                                         </div>
                                     </form>
                                 </div>

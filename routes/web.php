@@ -39,12 +39,15 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'callback'])->
 Route::get('/auth/facebook', [SocialAuthController::class, 'redirect'])->defaults('provider', 'facebook')->name('auth.facebook.redirect');
 Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callback'])->defaults('provider', 'facebook')->name('auth.facebook.callback');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::post('/notifications/read', [NotificationReadController::class, 'store'])->name('notifications.read');
+Route::post('/notifications/read', [NotificationReadController::class, 'store'])
+    ->middleware('auth')
+    ->name('notifications.read');
 
 Route::get('/subcription', [CustomerSubscriptionController::class, 'index'])->name('subcription');
 Route::post('/subcription/payment', [CustomerSubscriptionController::class, 'storePayment'])->name('subcription.payment');
 Route::get('/payment/midtrans/finish', [CustomerSubscriptionController::class, 'midtransFinish'])->name('payment.midtrans.finish');
 Route::post('/payment/midtrans/notification', [CustomerSubscriptionController::class, 'midtransNotification'])->name('payment.midtrans.notification');
+Route::view('/gatebook', 'layouts.customers.gatebook')->name('gatebook');
 
 
 /*
@@ -53,8 +56,7 @@ Route::post('/payment/midtrans/notification', [CustomerSubscriptionController::c
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('customer.access')->group(function () {
-    // Dashboard
+Route::middleware(['auth', 'customer.access'])->group(function () {    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 

@@ -32,7 +32,7 @@ class SamplingRequestController extends Controller
         if (! $samplingRequest->n27Exists()) {
             return back()->withErrors([
                 'n27_file' => 'The N27 file is not available yet.',
-            ]);
+            ], 'samplingAction');
         }
 
         return Storage::disk('public')->download(
@@ -43,7 +43,8 @@ class SamplingRequestController extends Controller
 
     public function markPaid(Request $request, SamplingRequest $samplingRequest): RedirectResponse
     {
-        $validated = $request->validate([
+        $request->session()->flash('admin_sampling_payment_id', $samplingRequest->id);
+        $validated = $request->validateWithBag('adminSamplingPayment', [
             'amount' => ['required', 'integer', 'min:0'],
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -56,7 +57,7 @@ class SamplingRequestController extends Controller
         if ((int) $validated['amount'] !== $expectedAmount) {
             throw ValidationException::withMessages([
                 'amount' => 'Sampling payment amount must be Rp '.number_format($expectedAmount, 0, ',', '.').'.',
-            ]);
+            ])->errorBag('adminSamplingPayment');
         }
 
         $payment = $samplingRequest->payment;
@@ -108,13 +109,13 @@ class SamplingRequestController extends Controller
         if ($samplingRequest->payment_status !== SamplingRequest::PAYMENT_PAID) {
             return back()->withErrors([
                 'status' => 'Payment must be completed before processing this N27 request.',
-            ]);
+            ], 'samplingAction');
         }
 
         if (! $samplingRequest->has_n27_file) {
             return back()->withErrors([
                 'status' => 'N27 file must be uploaded before processing can start.',
-            ]);
+            ], 'samplingAction');
         }
 
         $samplingRequest->update([
@@ -126,19 +127,20 @@ class SamplingRequestController extends Controller
 
     public function saveDelivery(Request $request, SamplingRequest $samplingRequest): RedirectResponse
     {
+        $request->session()->flash('admin_sampling_delivery_id', $samplingRequest->id);
         if ($samplingRequest->payment_status !== SamplingRequest::PAYMENT_PAID) {
             return back()->withErrors([
                 'delivery' => 'Payment must be completed before sending the completed sampling link.',
-            ]);
+            ], 'adminSamplingDelivery');
         }
 
         if (! $samplingRequest->has_n27_file) {
             return back()->withErrors([
                 'delivery' => 'Upload and process the customer N27 file before sending a Google Drive link.',
-            ]);
+            ], 'adminSamplingDelivery');
         }
 
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('adminSamplingDelivery', [
             'google_drive_link' => ['required', 'url', 'max:500'],
             'delivery_notes' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', Rule::in([

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
 
 class UserManagementController extends Controller
@@ -37,8 +38,10 @@ class UserManagementController extends Controller
     public function updateStatus(Request $request, User $user): RedirectResponse
     {
         $this->ensureCustomer($user);
+        $request->session()->flash('admin_user_manage_id', $user->id);
+        $request->session()->flash('admin_user_manage_tab', 'status-user-tab');
 
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('adminUserStatus', [
             'status' => ['required', Rule::in(self::STATUSES)],
             'cancel_subscription' => ['nullable', 'boolean'],
             'admin_note' => ['nullable', 'string', 'max:240'],
@@ -83,7 +86,7 @@ class UserManagementController extends Controller
         if (! $subscription && ! $payment) {
             return back()->withErrors([
                 'access' => 'No legacy pending payment or subscription was found for '.$user->name.'.',
-            ]);
+            ], 'adminUserAction');
         }
 
         $package = $subscription?->package ?: $payment?->package ?: 'Premium Monthly';
@@ -121,8 +124,10 @@ class UserManagementController extends Controller
     public function updatePlan(Request $request, User $user): RedirectResponse
     {
         $this->ensureCustomer($user);
+        $request->session()->flash('admin_user_manage_id', $user->id);
+        $request->session()->flash('admin_user_manage_tab', 'plan-user-tab');
 
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('adminUserPlan', [
             'plan' => ['required', Rule::in(self::PLANS)],
             'expires_at' => ['nullable', 'date', 'after_or_equal:today'],
         ]);
@@ -170,9 +175,14 @@ class UserManagementController extends Controller
     public function resetPassword(Request $request, User $user): RedirectResponse
     {
         $this->ensureCustomer($user);
+        $request->session()->flash('admin_user_manage_id', $user->id);
+        $request->session()->flash('admin_user_manage_tab', 'password-user-tab');
 
-        $validated = $request->validate([
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $validated = $request->validateWithBag('adminUserPassword', [
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
+        ], [
+            'password.letters' => 'Password harus berisi minimal satu huruf.',
+            'password.numbers' => 'Password harus berisi minimal satu angka.',
         ]);
 
         $user->update([

@@ -93,7 +93,7 @@ class StyleSamplingController extends Controller
                 ->route('subcription')
                 ->withErrors([
                     'subscription' => 'Subscription premium diperlukan untuk download STY. Sampling voice pack tetap dibeli terpisah sesuai pack yang dipakai style.',
-                ]);
+                ], 'subscriptionAccess');
         }
 
         $path = $styleSampling->style_file_path;
@@ -102,7 +102,7 @@ class StyleSamplingController extends Controller
         if (! $path || ! Storage::disk('public')->exists($path)) {
             return back()->withErrors([
                 'download' => 'The requested download file is not available yet.',
-            ]);
+            ], 'styleDownload');
         }
 
         $this->recordDownload($styleSampling, $filename);

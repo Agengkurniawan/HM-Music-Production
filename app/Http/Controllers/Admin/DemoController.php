@@ -35,7 +35,7 @@ class DemoController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('demoCreate', [
             'title' => ['required', 'string', 'max:120'],
             'youtube_url' => $this->youtubeUrlRules(required: false),
             'genre' => ['nullable', Rule::in(MusicDemo::genreOptions())],
@@ -49,7 +49,7 @@ class DemoController extends Controller
         $installationVideo = $request->file('installation_video');
         if (blank($validated['youtube_url'] ?? null) && ! ($installationVideo instanceof UploadedFile)) {
             return back()
-                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4.'])
+                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4.'], 'demoCreate')
                 ->withInput();
         }
 
@@ -77,7 +77,8 @@ class DemoController extends Controller
 
     public function update(Request $request, MusicDemo $demo): RedirectResponse
     {
-        $validated = $request->validate([
+        $request->session()->flash('admin_demo_edit_id', $demo->id);
+        $validated = $request->validateWithBag('demoEdit', [
             'title' => ['required', 'string', 'max:120'],
             'youtube_url' => $this->youtubeUrlRules(required: false),
             'genre' => ['nullable', Rule::in(MusicDemo::genreOptions())],
@@ -99,7 +100,7 @@ class DemoController extends Controller
             && ! $keepsExistingMp4
         ) {
             return back()
-                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4 sebelum menyimpan.'])
+                ->withErrors(['youtube_url' => 'Tambahkan link YouTube atau upload video MP4 sebelum menyimpan.'], 'demoEdit')
                 ->withInput();
         }
 

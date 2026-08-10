@@ -161,9 +161,14 @@
             <form class="modal-content password-reset-modal__content" action="{{ route('password.email') }}" method="POST">
                 @csrf
                 <div class="password-reset-modal__header">
-                    <div>
-                        <span>Customer verification</span>
-                        <h2 id="forgotPasswordModalTitle">Reset Password</h2>
+                    <div class="password-reset-modal__brand">
+                        <div class="password-reset-modal__mark" aria-hidden="true">
+                            <img src="{{ asset('img/logo-hm-transparent.png') }}" alt="">
+                        </div>
+                        <div>
+                            <span>HM Music Production</span>
+                            <h2 id="forgotPasswordModalTitle">Lupa Password</h2>
+                        </div>
                     </div>
                     <button class="password-reset-modal__close" type="button" data-bs-dismiss="modal" aria-label="Close">
                         <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -173,7 +178,7 @@
                 </div>
 
                 <p class="password-reset-modal__copy">
-                    Masukkan email customer. Kami kirim link verifikasi untuk membuat password baru.
+                    Masukkan email customer Anda. Kami akan mengirimkan link verifikasi untuk membuat password baru.
                 </p>
 
                 <label class="login-form__field" for="reset_email">
@@ -191,8 +196,8 @@
                 @endif
 
                 <div class="password-reset-modal__actions">
-                    <button type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit">Send Link</button>
+                    <button type="button" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit">Kirim Link</button>
                 </div>
             </form>
         </div>

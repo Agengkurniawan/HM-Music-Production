@@ -9,13 +9,18 @@
             $premiumPlan = $plans['premium_monthly'] ?? [
                 'name' => 'Premium Monthly',
                 'price' => \App\Models\SiteSetting::DEFAULT_SUBSCRIPTION_PRICE,
-                'period_label' => '/month',
+                'period_label' => '/bulan',
             ];
             $currentSubscription = $currentSubscription ?? null;
             $hasActiveSubscription = $hasActiveSubscription ?? false;
+            $periodLabelIndonesia = match($premiumPlan['period_label'] ?? null) {
+                '/90 days' => '/90 hari',
+                '/year' => '/tahun',
+                default => '/bulan',
+            };
             $premiumActionLabel = auth()->check()
-                ? ($hasActiveSubscription ? 'Extend Plan' : 'Renew STY Access')
-                : 'Register or Renew';
+                ? ($hasActiveSubscription ? 'Perpanjang Paket' : 'Perbarui Akses STY')
+                : 'Daftar atau Perbarui';
         @endphp
 
         @include('components.sidebar', [
@@ -29,23 +34,32 @@
             <div class="sectionprofil-6">
                 <div class="pricing">
                     <div class="pricing-header">
-                        <span>Subscription Plan</span>
-                        <h2>Unlock Premium STY Styles</h2>
-                        <p>Browse the style catalog first, then subscribe to unlock STY downloads. Style playback is not opened for customers; sampling voice packs are bought separately when a style needs the matching voice kit.</p>
+                        <div>
+                            <span>Paket Langganan</span>
+                            <h2>Buka Akses Style STY Premium</h2>
+                            <p>Lihat katalog style terlebih dahulu, lalu aktifkan subscription untuk mengunduh file STY. Sampling voice pack dibeli terpisah jika style membutuhkan voice kit yang sesuai.</p>
+                        </div>
+                        <div class="pricing-header__mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="M3 10h18" />
+                                <path d="M7 15h4" />
+                            </svg>
+                        </div>
                     </div>
 
                     @if(session('success'))
                         <div class="payment-alert">
                             <strong>{{ session('success') }}</strong>
                             @if(session('payment_reference'))
-                                <span>Payment reference: {{ session('payment_reference') }}</span>
+                                <span>Referensi pembayaran: {{ session('payment_reference') }}</span>
                             @endif
                         </div>
                     @endif
 
-                    @if($errors->any())
+                    @if($errors->getBag('default')->any() || $errors->subscriptionAccess->any())
                         <div class="payment-alert payment-alert--error">
-                            <strong>{{ $errors->first() }}</strong>
+                            <strong>{{ $errors->subscriptionAccess->first() ?: $errors->getBag('default')->first() }}</strong>
                         </div>
                     @endif
 
@@ -60,27 +74,27 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3>Free</h3>
-                                    <span>forever</span>
+                                    <h3>Gratis</h3>
+                                    <span>selamanya</span>
                                 </div>
                             </div>
 
                             <div class="price">Rp 0</div>
-                            <p class="desc">Perfect for browsing the catalog and listening to regular demo audio.</p>
+                            <p class="desc">Cocok untuk melihat katalog dan mendengarkan audio demo.</p>
 
                             <ul class="features">
-                                <li class="active">Play demo audio</li>
-                                <li class="active">Browse style catalog</li>
-                                <li>Download STY files</li>
-                                <li>Sampling voice pack payment</li>
-                                <li>Priority support</li>
+                                <li class="active">Putar audio demo</li>
+                                <li class="active">Lihat katalog style</li>
+                                <li>Unduh file STY</li>
+                                <li>Pembelian sampling voice pack</li>
+                                <li>Dukungan prioritas</li>
                             </ul>
 
-                            <button class="current-btn" type="button">Current Plan</button>
+                            <button class="current-btn" type="button">Paket Saat Ini</button>
                         </div>
 
                         <div class="plan-card premium">
-                            <span class="badge">Most Popular</span>
+                            <span class="badge">Paling Populer</span>
 
                             <div class="plan-top">
                                 <div class="plan-icon premium-icon">
@@ -90,33 +104,33 @@
                                 </div>
                                 <div>
                                     <h3>Premium</h3>
-                                    <span>{{ $premiumPlan['period_label'] }}</span>
+                                    <span>{{ $periodLabelIndonesia }}</span>
                                 </div>
                             </div>
 
-                            <div class="price">Rp {{ number_format((int) $premiumPlan['price'], 0, ',', '.') }}<span>{{ $premiumPlan['period_label'] }}</span></div>
-                            <p class="desc">Unlock premium style downloads. Sampling voice packs remain separate per pack.</p>
+                            <div class="price">Rp {{ number_format((int) $premiumPlan['price'], 0, ',', '.') }}<span>{{ $periodLabelIndonesia }}</span></div>
+                            <p class="desc">Buka akses download style premium. Sampling voice pack tetap dibeli terpisah untuk setiap pack.</p>
 
                             @if(auth()->check())
                                 <div class="plan-card__status {{ $hasActiveSubscription ? 'is-active' : 'is-expired' }}">
-                                    <strong>{{ $hasActiveSubscription ? 'Premium Active' : 'STY Access Locked' }}</strong>
+                                    <strong>{{ $hasActiveSubscription ? 'Premium Aktif' : 'Akses STY Terkunci' }}</strong>
                                     <span>
                                         @if($currentSubscription?->expires_at)
-                                            {{ $hasActiveSubscription ? 'Active until' : 'Expired on' }}
-                                            {{ $currentSubscription->expires_at->format('d M Y') }}
+                                            {{ $hasActiveSubscription ? 'Aktif sampai' : 'Berakhir pada' }}
+                                            {{ $currentSubscription->expires_at->format('d/m/Y') }}
                                         @else
-                                            {{ $hasActiveSubscription ? 'No expiry date' : 'Renew with your registered email' }}
+                                            {{ $hasActiveSubscription ? 'Tanpa tanggal berakhir' : 'Perbarui dengan email yang terdaftar' }}
                                         @endif
                                     </span>
                                 </div>
                             @endif
 
                             <ul class="features">
-                                <li class="active">Play demo audio</li>
-                                <li class="active">Browse style catalog</li>
-                                <li class="active">Download STY files</li>
-                                <li>Sampling voice pack payment</li>
-                                <li class="active">Priority support</li>
+                                <li class="active">Putar audio demo</li>
+                                <li class="active">Lihat katalog style</li>
+                                <li class="active">Unduh file STY</li>
+                                <li>Pembelian sampling voice pack</li>
+                                <li class="active">Dukungan prioritas</li>
                             </ul>
 
                             <button class="subscribe-btn"
@@ -130,13 +144,13 @@
 
                     <section class="subscription-benefits">
                         <article>
-                            <strong>Download-Only Catalog</strong>
-                            <p>Customers can browse styles, then download STY after subscription is active.</p>
+                            <strong>Katalog Unduhan STY</strong>
+                            <p>Customer dapat melihat katalog, kemudian mengunduh STY setelah subscription aktif.</p>
                         </article>
 
                         <article>
-                            <strong>STY File</strong>
-                            <p>Premium access unlocks the keyboard style file for download.</p>
+                            <strong>File STY</strong>
+                            <p>Akses Premium membuka file style keyboard untuk diunduh.</p>
                         </article>
 
                         <article>
@@ -153,7 +167,7 @@
 @endsection
 
 @push('script')
-@if($errors->any())
+@if($errors->subscriptionCheckout->any())
 <script>
     window.addEventListener('load', () => {
         const modalElement = document.getElementById('subscriptionPaymentModal');

@@ -21,6 +21,12 @@
                 ];
             @endphp
             <section class="admin-demo">
+                @if(session('success'))
+                    <div class="usermanagement-alert usermanagement-alert--success">{{ session('success') }}</div>
+                @endif
+                @if($errors->getBag('default')->any())
+                    <div class="usermanagement-alert usermanagement-alert--error">{{ $errors->getBag('default')->first() }}</div>
+                @endif
                 <div class="admin-demo__summary">
                     <article>
                         <div class="admin-demo__summary-icon">
@@ -175,6 +181,7 @@
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#demoEditModal"
                                                         data-demo-action="edit"
+                                                        data-demo-id="{{ $demo->id }}"
                                                         data-demo-title="{{ $demo->title }}"
                                                         data-demo-youtube-url="{{ $demo->youtube_url }}"
                                                         data-demo-has-installation-video="{{ $demo->installation_video_path ? '1' : '0' }}"
@@ -264,5 +271,16 @@
             if (trending) trending.checked = button.dataset.demoTrending === '1';
         });
     });
+
+    @if($errors->demoCreate->any())
+    window.addEventListener('load', () => bootstrap.Modal.getOrCreateInstance(document.getElementById('uploadDemoModal')).show());
+    @endif
+
+    @if($errors->demoEdit->any() && session('admin_demo_edit_id'))
+    window.addEventListener('load', () => {
+        const button = document.querySelector('[data-demo-action="edit"][data-demo-id="{{ session('admin_demo_edit_id') }}"]');
+        if (button) { button.click(); }
+    });
+    @endif
 </script>
 @endpush

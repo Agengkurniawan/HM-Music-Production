@@ -10,6 +10,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+    <link rel="icon" type="image/png" sizes="128x128" href="{{ asset('img/LOGO HM.png') }}">
+
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -29,6 +31,10 @@
 
 <body>
     @yield('content')
+
+    @if (request()->routeIs('login', 'password.*', 'demo', 'dashboard', 'stylesampling', 'subcription', 'gatebook', 'payment.midtrans.finish'))
+        @include('components.customer-contact')
+    @endif
 
     <!-- jQuery (Harus dimuat pertama) -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>

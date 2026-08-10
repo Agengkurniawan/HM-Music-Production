@@ -23,6 +23,9 @@
                 </div>
                 <hr>
                 <div class="modal-body">
+                    @if($errors->demoCreate->any())
+                        <div class="modal-alert modal-alert--danger"><strong>Demo belum dapat disimpan.</strong><span>{{ $errors->demoCreate->first() }}</span></div>
+                    @endif
                     <label>
                         YouTube Video URL
                         <input type="url" name="youtube_url" value="{{ old('youtube_url') }}" placeholder="https://www.youtube.com/watch?v=...">
@@ -108,6 +111,9 @@
                     </div>
                     <hr>
                     <div class="modal-body">
+                        @if($errors->demoEdit->any())
+                            <div class="modal-alert modal-alert--danger"><strong>Perubahan demo belum dapat disimpan.</strong><span>{{ $errors->demoEdit->first() }}</span></div>
+                        @endif
                         <label>
                             Demo Title
                             <input type="text" name="title" data-demo-edit-title required>
@@ -320,6 +326,9 @@
                     </div>
                     <hr>
                     <div class="modal-body">
+                        @if($errors->editStyle->any())
+                            <div class="modal-alert modal-alert--danger"><strong>Perubahan style belum dapat disimpan.</strong><span>{{ $errors->editStyle->first() }}</span></div>
+                        @endif
                         <p class="modal-context" data-style-modal-name>Selected style</p>
 
                         <label>
@@ -404,6 +413,9 @@
                     </div>
                     <hr>
                     <div class="modal-body">
+                        @if($errors->adminSamplingPayment->any())
+                            <div class="modal-alert modal-alert--danger"><strong>Pembayaran belum dapat dikonfirmasi.</strong><span>{{ $errors->adminSamplingPayment->first() }}</span></div>
+                        @endif
                         <p class="modal-context" data-sampling-payment-context>Selected sampling request</p>
 
                         <label>
@@ -442,6 +454,9 @@
                     </div>
                     <hr>
                     <div class="modal-body">
+                        @if($errors->adminSamplingDelivery->any())
+                            <div class="modal-alert modal-alert--danger"><strong>Hasil sampling belum dapat dikirim.</strong><span>{{ $errors->adminSamplingDelivery->first() }}</span></div>
+                        @endif
                         <p class="modal-context" data-sampling-context>Selected sampling request</p>
 
                         <label>
@@ -493,6 +508,12 @@
                 <hr>
 
                 <div class="modal-body">
+                    @if($errors->adminUserStatus->any() || $errors->adminUserPlan->any() || $errors->adminUserPassword->any())
+                        <div class="modal-alert modal-alert--danger">
+                            <strong>Perubahan customer belum dapat disimpan.</strong>
+                            <span>{{ $errors->adminUserStatus->first() ?: $errors->adminUserPlan->first() ?: $errors->adminUserPassword->first() }}</span>
+                        </div>
+                    @endif
                     <div class="user-manage-overview">
                         <div>
                             <span>Plan</span>
@@ -708,19 +729,19 @@
         $checkoutUser = auth()->user();
         $hasActiveSubscription = $hasActiveSubscription ?? false;
         $checkoutModeLabel = $checkoutUser
-            ? ($hasActiveSubscription ? 'Extend STY Access' : 'Renew STY Access')
-            : 'Register or Renew STY';
+            ? ($hasActiveSubscription ? 'Perpanjang Akses STY' : 'Perbarui Akses STY')
+            : 'Daftar atau Perbarui Akses STY';
     @endphp
     <div class="modal fade" id="subscriptionPaymentModal" tabindex="-1" aria-labelledby="subscriptionPaymentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <span class="modal-eyebrow">Premium Payment</span>
+                        <span class="modal-eyebrow">Pembayaran Premium</span>
                         <h2 class="modal-title" id="subscriptionPaymentModalLabel">{{ $checkoutModeLabel }}</h2>
                     </div>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
 
                 <form class="modal-form" action="{{ route('subcription.payment') }}" method="POST" enctype="multipart/form-data">
@@ -730,14 +751,20 @@
                     <input type="hidden" name="method" value="Midtrans Snap Sandbox">
                     <hr>
                     <div class="modal-body">
+                        @if($errors->subscriptionCheckout->any())
+                            <div class="modal-alert modal-alert--danger" role="alert">
+                                <strong>Data subscription belum benar.</strong>
+                                <span>{{ $errors->subscriptionCheckout->first() }}</span>
+                            </div>
+                        @endif
                         <div class="modal-summary">
                             <div>
-                                <span>Selected Plan</span>
-                                <strong>{{ $premiumPlan['name'] }}</strong>
+                                <span>Paket Dipilih</span>
+                                <strong>{{ match($premiumPlan['name']) { 'Premium 90 Days' => 'Premium 90 Hari', 'Premium Yearly' => 'Premium Tahunan', default => 'Premium Bulanan' } }}</strong>
                             </div>
 
                             <div>
-                                <span>Midtrans Payment</span>
+                                <span>Pembayaran Midtrans</span>
                                 <strong>Rp {{ number_format((int) $premiumPlan['price'], 0, ',', '.') }}</strong>
                             </div>
                         </div>
@@ -745,7 +772,7 @@
                         <div class="social-register">
                             @if($checkoutUser?->hasSocialLogin())
                                 <div class="social-register__connected">
-                                    <strong>{{ $checkoutUser->socialLoginProviderLabel() }} connected</strong>
+                                    <strong>{{ $checkoutUser->socialLoginProviderLabel() }} terhubung</strong>
                                     <span>{{ $checkoutUser->email }}</span>
                                 </div>
                             @else
@@ -771,54 +798,54 @@
                         </div>
 
                         <div class="modal-section">
-                            <span>Customer Data</span>
-                            <h3>Registration or Renewal</h3>
+                            <span>Data Customer</span>
+                            <h3>Pendaftaran atau Perpanjangan</h3>
                         </div>
 
                         <div class="modal-grid">
                             <label>
-                                Full Name
-                                <input type="text" name="name" value="{{ old('name', $checkoutUser?->name) }}" placeholder="Your name" required>
-                                @error('name')<small>{{ $message }}</small>@enderror
+                                Nama Lengkap
+                                <input type="text" name="name" value="{{ old('name', $checkoutUser?->name) }}" placeholder="Nama lengkap Anda" required>
+                                @error('name', 'subscriptionCheckout')<small>{{ $message }}</small>@enderror
                             </label>
 
                             <label>
                                 Email / Gmail
                                 <input id="subscription-email" type="email" name="email" value="{{ old('email', $checkoutUser?->email) }}" placeholder="name@gmail.com" @readonly($checkoutUser) required>
-                                @error('email')<small>{{ $message }}</small>@enderror
+                                @error('email', 'subscriptionCheckout')<small>{{ $message }}</small>@enderror
                             </label>
 
                             @unless($checkoutUser?->hasSocialLogin())
                                 <label>
                                     Password
-                                    <input type="password" name="password" placeholder="{{ $checkoutUser ? 'Confirm current password' : 'Create new or enter current password' }}" required>
-                                    @error('password')<small>{{ $message }}</small>@enderror
+                                    <input type="password" name="password" placeholder="{{ $checkoutUser ? 'Masukkan password saat ini' : 'Buat password baru atau masukkan password saat ini' }}" required>
+                                    @error('password', 'subscriptionCheckout')<small>{{ $message }}</small>@enderror
                                 </label>
 
                                 <label>
-                                    Confirm Password
-                                    <input type="password" name="password_confirmation" placeholder="Repeat password" required>
+                                    Konfirmasi Password
+                                    <input type="password" name="password_confirmation" placeholder="Ulangi password" required>
                                 </label>
                             @endunless
 
                             <label>
-                                Phone
+                                Nomor Telepon
                                 <input type="text" name="phone" value="{{ old('phone') }}" placeholder="+62">
-                                @error('phone')<small>{{ $message }}</small>@enderror
+                                @error('phone', 'subscriptionCheckout')<small>{{ $message }}</small>@enderror
                             </label>
 
                             <label class="modal-file">
-                                Profile Photo
+                                Foto Profil
                                 <input type="file" name="profile_photo" accept="image/png,image/jpeg,image/webp">
-                                <span>JPG, PNG, or WEBP up to 2 MB. If empty, avatar is generated from your name.</span>
-                                @error('profile_photo')<small>{{ $message }}</small>@enderror
+                                <span>Format JPG, PNG, atau WEBP maksimal 2 MB. Jika kosong, avatar dibuat otomatis dari nama Anda.</span>
+                                @error('profile_photo', 'subscriptionCheckout')<small>{{ $message }}</small>@enderror
                             </label>
 
                         </div>
                     </div>
                     <hr>
                     <div class="modal-footer">
-                        <button type="button" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" data-bs-dismiss="modal">Batal</button>
                         <button type="submit">{{ $checkoutModeLabel }}</button>
                     </div>
                 </form>

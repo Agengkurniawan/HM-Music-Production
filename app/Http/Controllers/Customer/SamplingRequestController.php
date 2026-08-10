@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -26,7 +27,7 @@ class SamplingRequestController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
+        $validated = $request->validateWithBag('samplingRequest', [
             'pack_name' => ['required', Rule::in(StyleSampling::samplingRequestPackNames())],
             'keyboard_storage_mb' => ['nullable', 'integer', 'min:1', 'max:4096'],
             'customer_notes' => ['nullable', 'string', 'max:1000'],
@@ -61,7 +62,7 @@ class SamplingRequestController extends Controller
             ->with('success', 'Checkout sampling pack berhasil dibuat. '.StyleSampling::samplingRequestAdvice(
                 $validated['pack_name'],
                 $validated['keyboard_storage_mb'] ?? null,
-            ).' Modal pembayaran Midtrans akan terbuka untuk melanjutkan checkout.');
+            ).' Ringkasan pembayaran akan terbuka untuk melanjutkan pesanan.');
     }
 
     public function pay(Request $request, SamplingRequest $samplingRequest): RedirectResponse
@@ -129,15 +130,15 @@ class SamplingRequestController extends Controller
 
             throw ValidationException::withMessages([
                 'payment' => $exception->getMessage(),
-            ]);
+            ])->errorBag('samplingPayment');
         } catch (\Throwable $exception) {
             report($exception);
 
             $payment->update(['status' => 'Failed']);
 
             throw ValidationException::withMessages([
-                'payment' => 'Midtrans checkout sampling belum bisa dibuat. Periksa konfigurasi Server Key dan koneksi payment gateway.',
-            ]);
+                'payment' => 'Pembayaran belum dapat dibuka. Silakan coba kembali atau hubungi admin.',
+            ])->errorBag('samplingPayment');
         }
 
         $request->session()->put('pending_payment_reference', $payment->reference);
@@ -161,8 +162,8 @@ class SamplingRequestController extends Controller
             return redirect()
                 ->route('stylesampling', ['type' => 'sampling'])
                 ->withErrors([
-                    'payment' => 'Belum ada transaksi Midtrans untuk order ini. Klik Bayar via Midtrans terlebih dahulu.',
-                ]);
+                    'payment' => 'Belum ada transaksi untuk pesanan ini. Silakan lanjutkan pembayaran terlebih dahulu.',
+                ], 'samplingPayment');
         }
 
         try {
@@ -170,21 +171,21 @@ class SamplingRequestController extends Controller
         } catch (RuntimeException $exception) {
             throw ValidationException::withMessages([
                 'payment' => $exception->getMessage(),
-            ]);
+            ])->errorBag('samplingPayment');
         } catch (\Throwable $exception) {
             report($exception);
 
             throw ValidationException::withMessages([
-                'payment' => 'Status pembayaran belum bisa dicek. Pastikan Server Key sandbox benar dan coba lagi.',
-            ]);
+                'payment' => 'Status pembayaran belum dapat diperiksa. Silakan coba beberapa saat lagi.',
+            ])->errorBag('samplingPayment');
         }
 
         if ($gateway->completedStatus($payload) && ! $gateway->paymentAmountMatches($payment, $payload)) {
             return redirect()
                 ->route('stylesampling', ['type' => 'sampling'])
                 ->withErrors([
-                    'payment' => 'Nominal pembayaran Midtrans tidak sesuai invoice sampling. Hubungi admin sebelum upload N27.',
-                ]);
+                    'payment' => 'Nominal pembayaran tidak sesuai dengan invoice sampling. Hubungi admin sebelum upload N27.',
+                ], 'samplingPayment');
         }
 
         if ($gateway->completedStatus($payload)) {
@@ -210,26 +211,27 @@ class SamplingRequestController extends Controller
             return redirect()
                 ->route('stylesampling', ['type' => 'sampling'])
                 ->withErrors([
-                    'payment' => "Pembayaran Midtrans berstatus {$failedStatus}. Silakan buat pembayaran baru.",
-                ]);
+                    'payment' => "Pembayaran berstatus {$failedStatus}. Silakan buat pembayaran baru.",
+                ], 'samplingPayment');
         }
 
         return redirect()
             ->route('stylesampling', ['type' => 'sampling'])
-            ->with('success', 'Pembayaran masih diproses oleh Midtrans. Setelah berhasil, klik Cek Status Pembayaran lagi agar upload N27 terbuka.');
+            ->with('success', 'Pembayaran masih diproses. Setelah berhasil, klik Cek Status Pembayaran lagi agar upload N27 terbuka.');
     }
 
     public function uploadN27(Request $request, SamplingRequest $samplingRequest): RedirectResponse
     {
         abort_unless($samplingRequest->user_id === Auth::id(), 403);
+        $request->session()->flash('sampling_upload_request_id', $samplingRequest->id);
 
         if (! $samplingRequest->can_upload_n27) {
             throw ValidationException::withMessages([
                 'n27_file' => 'The N27 file can only be uploaded after the order is paid and before final delivery.',
-            ]);
+            ])->errorBag('samplingUpload');
         }
 
-        $request->validate([
+        $request->validateWithBag('samplingUpload', [
             'n27_file' => ['required', 'file', 'max:102400'],
         ]);
 
@@ -238,15 +240,28 @@ class SamplingRequestController extends Controller
         if (strtolower($file->getClientOriginalExtension()) !== 'n27') {
             throw ValidationException::withMessages([
                 'n27_file' => 'Please upload a valid .n27 file.',
-            ]);
+            ])->errorBag('samplingUpload');
         }
 
-        $samplingRequest->update([
-            'n27_file_path' => $file->store('sampling-requests/n27', 'public'),
-            'n27_original_name' => $file->getClientOriginalName(),
-            'n27_uploaded_at' => now(),
-            'status' => SamplingRequest::STATUS_N27_UPLOADED,
-        ]);
+        $oldPath = $samplingRequest->n27_file_path;
+        $newPath = $file->store('sampling-requests/n27', 'public');
+
+        try {
+            $samplingRequest->update([
+                'n27_file_path' => $newPath,
+                'n27_original_name' => $file->getClientOriginalName(),
+                'n27_uploaded_at' => now(),
+                'status' => SamplingRequest::STATUS_N27_UPLOADED,
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($newPath);
+
+            throw $exception;
+        }
+
+        if ($oldPath && $oldPath !== $newPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
 
         $samplingRequest->user?->update([
             'last_activity' => 'Uploaded N27 file for '.$samplingRequest->order_reference,

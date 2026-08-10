@@ -79,9 +79,14 @@ class AuthController extends Controller
 
     private function isVerifiedAdmin(User $user): bool
     {
+        $adminEmails = array_map(
+            fn ($email) => Str::lower($email),
+            config('hm.admin_emails', [])
+        );
+
         return $user->role === 'admin'
             && $user->email_verified_at !== null
-            && Str::lower($user->email) === Str::lower((string) config('hm.admin_email'));
+            && in_array(Str::lower($user->email), $adminEmails, true);
     }
 
     private function isSuspendedCustomer(?User $user): bool

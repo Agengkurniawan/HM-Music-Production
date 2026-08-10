@@ -18,9 +18,14 @@ class EnsureVerifiedAdmin
             return redirect()->route('login');
         }
 
+        $adminEmails = array_map(
+            fn ($email) => Str::lower($email),
+            config('hm.admin_emails', [])
+        );
+
         $isVerifiedAdmin = $user->role === 'admin'
             && $user->email_verified_at !== null
-            && Str::lower($user->email) === Str::lower((string) config('hm.admin_email'));
+            && in_array(Str::lower($user->email), $adminEmails, true);
 
         abort_unless($isVerifiedAdmin, 403);
 

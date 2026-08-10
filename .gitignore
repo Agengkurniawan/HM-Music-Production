@@ -25,3 +25,17 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local production files
+error_log
+*.sql
+*.zip
+
+# Local production files
+error_log
+*.sql
+*.zip
+error_log
+*.sql
+*.zip
+docs/QA_Test_Cases_HM_Music_Production.xlsx

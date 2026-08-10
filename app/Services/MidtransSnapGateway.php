@@ -88,7 +88,9 @@ class MidtransSnapGateway
 
     public function serverKey(): string
     {
-        $key = config('services.midtrans.server_key') ?: SiteSetting::value('merchant_key');
+        $key = $this->storedSetting('midtrans_server_key')
+            ?: $this->storedSetting('merchant_key')
+            ?: config('services.midtrans.server_key');
 
         if (blank($key) || in_array($key, ['hm-production-key', 'your-midtrans-server-key'], true)) {
             throw new RuntimeException('Midtrans Server Key is not configured.');
@@ -171,19 +173,32 @@ class MidtransSnapGateway
 
     private function isProduction(): bool
     {
+        $storedMode = $this->storedSetting('midtrans_is_production');
+
+        if ($storedMode !== null) {
+            return $storedMode === '1';
+        }
+
         $configuredMode = config('services.midtrans.is_production');
 
         if ($configuredMode !== null) {
             return filter_var($configuredMode, FILTER_VALIDATE_BOOLEAN);
         }
 
-        return SiteSetting::value('midtrans_is_production', '0') === '1';
+        return false;
     }
 
     private function clientKey(): string
     {
-        return (string) (config('services.midtrans.client_key') ?: SiteSetting::value('midtrans_client_key'));
+        return (string) ($this->storedSetting('midtrans_client_key') ?: config('services.midtrans.client_key'));
     }
+
+    private function storedSetting(string $key): ?string
+    {
+        $value = SiteSetting::query()->where('key', $key)->value('value');
+
+        return filled($value) ? (string) $value : null;
+      }
 
     private function looksLikeLegacySandboxKey(string $key): bool
     {

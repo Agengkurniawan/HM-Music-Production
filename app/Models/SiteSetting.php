@@ -11,6 +11,8 @@ class SiteSetting extends Model
     public const DEFAULTS = [
         'subscription_price' => '55000',
         'plan_duration' => '30 Days',
+        'midtrans_server_key' => '',
+        // Kept temporarily so existing installations can migrate their saved key.
         'merchant_key' => '',
         'midtrans_client_key' => '',
         'midtrans_is_production' => '0',

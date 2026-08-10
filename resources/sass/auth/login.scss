@@ -933,12 +933,17 @@ $login-success: #15803d;
 .password-reset-modal {
     --bs-modal-width: 430px;
 
+    .modal-dialog {
+        padding: 12px;
+    }
+
     &__content {
         gap: 16px;
-        padding: 22px;
-        border: 0;
+        padding: clamp(22px, 5vw, 30px);
+        border: 1px solid $login-line;
         border-radius: 8px;
-        box-shadow: 0 24px 60px rgba(17, 24, 39, 0.24);
+        background: $login-paper;
+        box-shadow: 0 24px 60px rgba(17, 24, 39, 0.2);
     }
 
     &__header {
@@ -949,12 +954,11 @@ $login-success: #15803d;
 
         span {
             display: block;
-            margin-bottom: 5px;
-            color: $login-violet;
-            font-size: 12px;
-            font-weight: 900;
+            margin-bottom: 3px;
+            color: $login-muted;
+            font-size: 13px;
+            font-weight: 700;
             line-height: 1.2;
-            text-transform: uppercase;
         }
 
         h2 {
@@ -963,6 +967,30 @@ $login-success: #15803d;
             font-size: 26px;
             font-weight: 900;
             line-height: 1.1;
+        }
+    }
+
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__mark {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        flex: 0 0 52px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            transform: scale(1.18);
+            filter: contrast(1.25) brightness(0.95)
+                drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
         }
     }
 
@@ -1011,24 +1039,39 @@ $login-success: #15803d;
             font-size: 14px;
             font-weight: 900;
             cursor: pointer;
+            transition:
+                border-color 0.2s ease,
+                background 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
 
             &:first-child {
                 border: 1px solid #d5dce6;
                 background: #ffffff;
                 color: $login-charcoal;
 
-                &:hover{
-                    background: #ebebeb;
-                    border-color: #c3c3c3;
+                &:hover,
+                &:focus-visible {
+                    border-color: $login-blue;
+                    background: #edf4ff;
+                    color: $login-blue;
+                    outline: 0;
                 }
             }
 
             &:last-child {
                 border: 0;
-                background: $login-charcoal;
+                background: linear-gradient(135deg, $login-violet, $login-pink);
                 color: #ffffff;
-                &:hover{
-                    background: #293444;
+                box-shadow: 0 12px 24px rgba(124, 58, 237, 0.22);
+
+                &:hover,
+                &:focus-visible {
+                    background: linear-gradient(135deg, #7e22ce, #db2777);
+                    box-shadow: 0 14px 28px rgba(124, 58, 237, 0.3);
+                    transform: translateY(-1px);
+                    outline: 0;
                 }
             }
         }

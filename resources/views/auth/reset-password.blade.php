@@ -2,75 +2,22 @@
 
 @section('content')
 <main class="login-page">
-    <section class="login-page__shell login-page__shell--compact" aria-labelledby="reset-password-title">
-        <aside class="login-showcase" aria-label="HM Music new password">
-            <div class="login-showcase__brand">
-                <div class="login-page__mark" aria-hidden="true">
-                    <img src="{{ asset('img/logo-hm-transparent.png') }}" alt="">
-                </div>
-                <div>
-                    <span>HM Music Production</span>
-                    <strong>New Password</strong>
-                </div>
+    <section class="login-page__shell" aria-labelledby="reset-password-title">
+        <aside class="login-hero" aria-label="HM Music Production">
+            <div class="login-hero__logo">
+                <img src="{{ asset('img/logo-hm-transparent.png') }}" alt="HM Music Production">
             </div>
 
-            <div class="login-showcase__headline">
-                <p>Verified link</p>
-                <h2>Buat password baru yang lebih kuat.</h2>
+            <div class="login-hero__copy">
+                <span>HM Music Production</span>
+                <h2>Kelola akses style, demo, dan sampling dengan lebih mudah.</h2>
+                <p>Buat password baru untuk kembali melanjutkan aktivitas akun customer Anda.</p>
             </div>
 
-            <div class="login-showcase__board" aria-hidden="true">
-                <div class="login-showcase__session">
-                    <div class="login-showcase__session-top">
-                        <span>Password Update</span>
-                        <strong>LOCK</strong>
-                    </div>
-                    <div class="login-showcase__wave">
-                        <span style="--height: 48%"></span>
-                        <span style="--height: 76%"></span>
-                        <span style="--height: 42%"></span>
-                        <span style="--height: 86%"></span>
-                        <span style="--height: 58%"></span>
-                        <span style="--height: 72%"></span>
-                        <span style="--height: 36%"></span>
-                        <span style="--height: 80%"></span>
-                        <span style="--height: 54%"></span>
-                        <span style="--height: 66%"></span>
-                    </div>
-                    <div class="login-showcase__timeline">
-                        <span></span>
-                    </div>
-                </div>
-
-                <div class="login-showcase__stack">
-                    <article>
-                        <span>Min</span>
-                        <strong>8 Char</strong>
-                    </article>
-                    <article>
-                        <span>Use</span>
-                        <strong>Letters</strong>
-                    </article>
-                    <article>
-                        <span>Add</span>
-                        <strong>Number</strong>
-                    </article>
-                </div>
-            </div>
-
-            <div class="login-showcase__stats">
-                <div>
-                    <span>Secure</span>
-                    <strong>Token</strong>
-                </div>
-                <div>
-                    <span>Fresh</span>
-                    <strong>Password</strong>
-                </div>
-                <div>
-                    <span>Back</span>
-                    <strong>Login</strong>
-                </div>
+            <div class="login-hero__features" aria-hidden="true">
+                <span>STY Library</span>
+                <span>Demo Audio</span>
+                <span>N27 Request</span>
             </div>
         </aside>
 
@@ -81,13 +28,12 @@
                 </div>
                 <div>
                     <span>HM Music Production</span>
-                    <strong>New Password</strong>
+                    <strong>Member Login</strong>
                 </div>
             </div>
 
             <div class="login-page__intro">
-                <p class="login-page__eyebrow">Verification complete</p>
-                <h1 id="reset-password-title">New Password</h1>
+                <h1 id="reset-password-title">Password Baru</h1>
                 <p>Masukkan password baru untuk akun customer Anda. Setelah tersimpan, silakan login kembali.</p>
             </div>
 
@@ -141,7 +87,7 @@
                 @endif
 
                 <button class="login-form__submit" type="submit">
-                    <span>Save New Password</span>
+                    <span>Simpan Password Baru</span>
                     <svg viewBox="0 0 20 20" aria-hidden="true">
                         <path d="M15.8333 5.34163L8.01667 13.1583L4.16667 9.30829C3.84167 8.98329 3.31667 8.98329 2.99167 9.30829C2.66667 9.63329 2.66667 10.1583 2.99167 10.4833L7.43333 14.925C7.59167 15.0833 7.80833 15.175 8.01667 15.175C8.225 15.175 8.44167 15.0916 8.6 14.925L17.0083 6.51663C17.3333 6.19163 17.3333 5.66663 17.0083 5.34163C16.6833 5.01663 16.1583 5.01663 15.8333 5.34163Z" />
                     </svg>
@@ -149,8 +95,8 @@
 
                 <div class="login-form__register login-form__register--quiet">
                     <div class="login-form__register-copy">
-                        <span>Need a new link?</span>
-                        <a href="{{ route('password.request') }}">Request again</a>
+                        <span>Butuh link baru?</span>
+                        <a href="{{ route('password.request') }}">Minta ulang</a>
                     </div>
                     <p>Password harus minimal 8 karakter, mengandung huruf dan angka.</p>
                 </div>
