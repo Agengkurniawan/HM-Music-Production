@@ -1,0 +1,11 @@
+---
+deployment:
+  tasks:
+    - export APPPATH=/home/hmmusicp5/HM-Music-Production
+    - export WEBPATH=/home/hmmusicp5/public_html
+    - /bin/cp -a $APPPATH/public/build/. $WEBPATH/build/
+    - /bin/cp -a $APPPATH/public/audio/. $WEBPATH/audio/
+    - /bin/cp -a $APPPATH/public/img/. $WEBPATH/img/
+    - /bin/cp $APPPATH/public/favicon.ico $WEBPATH/favicon.ico
+    - /bin/cp $APPPATH/public/robots.txt $WEBPATH/robots.txt
+    - /opt/cpanel/ea-php84/root/usr/bin/php $APPPATH/artisan optimize:clear
