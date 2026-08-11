@@ -35,3 +35,226 @@ $violet: #7c3aed;
 @media (max-width: 1050px) { .flow-grid { grid-template-columns: repeat(2,1fr); article:nth-child(2)::after { display: none; } } .start-guide__choices { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { .gatebook-layout .hall-second { width: 100%; padding: 12px; } .gatebook { padding: 8px 0 30px; } .gatebook-hero { padding: 26px; &__mark { display: none; } } .gatebook-paths, .status-guide { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .gatebook-section { padding: 20px; } .flow-grid { grid-template-columns: 1fr; article::after { display: none; } } .journey-list article { grid-template-columns: 38px 1fr; > a { grid-column: 2; width: fit-content; } } .gatebook-note { flex-direction: column; } .access-table { overflow-x: auto; &__row { min-width: 620px; } } .after-access__grid { grid-template-columns: 1fr; } .gatebook-help { align-items: stretch; flex-direction: column; a { text-align: center; } } }
+
+// Gatebook-specific mobile refinements. Keep every guide readable without
+// requiring the whole page to scroll horizontally.
+.gatebook,
+.gatebook > *,
+.gatebook-section,
+.gatebook-heading > div,
+.journey-list article > div,
+.status-guide article > div {
+    min-width: 0;
+}
+
+@media (max-width: 800px) {
+    .gatebook-shortcuts {
+        width: calc(100% + 12px);
+        margin-right: -12px;
+        padding: 2px 12px 8px 0;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+
+        a {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+        }
+    }
+
+    .gatebook-heading {
+        align-items: flex-start;
+
+        > span {
+            flex: 0 0 42px;
+        }
+
+        h2,
+        p {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .journey-list article {
+        align-items: start;
+
+        > a {
+            white-space: nowrap;
+        }
+    }
+
+    .path-card {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 560px) {
+    .gatebook {
+        gap: 14px;
+    }
+
+    .gatebook-hero {
+        padding: 20px 18px;
+
+        h1 {
+            margin-top: 10px;
+            font-size: clamp(25px, 8vw, 30px);
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .gatebook-section {
+        padding: 18px;
+    }
+
+    .gatebook-heading {
+        gap: 11px;
+        margin-bottom: 18px;
+
+        > span {
+            width: 36px;
+            height: 36px;
+            flex-basis: 36px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        h2 {
+            font-size: 19px;
+            line-height: 1.2;
+        }
+
+        p {
+            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+    }
+
+    .start-guide__choices article,
+    .status-guide article,
+    .after-access__grid article {
+        padding: 16px;
+    }
+
+    .journey-list article {
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 11px;
+        padding: 16px 0;
+
+        b {
+            width: 34px;
+            height: 34px;
+        }
+
+        > a {
+            grid-column: 2;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+    }
+
+    .path-card {
+        padding-top: 18px;
+
+        &__icon {
+            width: 42px;
+            height: 42px;
+            margin-bottom: 14px;
+        }
+
+        &__label {
+            top: 20px;
+            right: 18px;
+        }
+
+        h2 {
+            padding-right: 0;
+            font-size: 19px;
+        }
+
+        ol {
+            padding-left: 18px;
+        }
+    }
+
+    .access-table {
+        overflow: hidden;
+        border: 0;
+        background: transparent;
+
+        &__head {
+            display: none;
+        }
+
+        &__row:not(.access-table__head) {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid $line;
+            border-radius: 10px;
+            background: #fff;
+
+            > * {
+                box-sizing: border-box;
+                width: 100%;
+                padding: 11px 13px;
+                border-bottom: 1px solid #edf0f5;
+            }
+
+            > strong {
+                color: #fff;
+                background: #172033;
+                font-size: 13px;
+            }
+
+            > span {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                text-align: right;
+
+                &::before {
+                    color: $muted;
+                    font-size: 12px;
+                    font-weight: 700;
+                    text-align: left;
+                }
+
+                &:nth-child(2)::before { content: "Belum login"; }
+                &:nth-child(3)::before { content: "Akun Free"; }
+                &:nth-child(4)::before { content: "Premium aktif"; }
+
+                &:last-child {
+                    border-bottom: 0;
+                }
+            }
+        }
+    }
+
+    .gatebook-help {
+        padding: 20px 18px;
+
+        a {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+}
+
+@media (max-width: 380px) {
+    .gatebook-section,
+    .gatebook-hero {
+        padding: 15px;
+    }
+
+    .gatebook-heading {
+        > span {
+            display: none;
+        }
+    }
+}
