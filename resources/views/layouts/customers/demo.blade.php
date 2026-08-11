@@ -42,7 +42,7 @@
                         </div>
                     </div>
 
-                    <div class="categories" aria-label="Demo categories">
+                    <nav class="categories" aria-label="Demo categories">
                         @foreach($categories as $category)
                             <button
                                 class="{{ $loop->first ? 'active' : '' }}"
@@ -50,7 +50,7 @@
                                 data-demo-filter="{{ $category }}"
                                 aria-pressed="{{ $loop->first ? 'true' : 'false' }}">{{ $category }}</button>
                         @endforeach
-                    </div>
+                    </nav>
 
                     <div class="grid" data-demo-grid>
                         @foreach ($demos as $demo)
@@ -285,6 +285,12 @@
             const isActive = filterButton === button;
             filterButton.classList.toggle('active', isActive);
             filterButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        button.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center',
         });
 
         document.querySelectorAll('.demo-card').forEach((card) => {

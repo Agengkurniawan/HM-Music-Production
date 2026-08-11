@@ -187,36 +187,73 @@ $demo-amber: #f59e0b;
 
     .categories {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 10px;
+        max-width: 100%;
         margin-bottom: 20px;
+        padding: 2px 2px 9px;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        scroll-behavior: smooth;
+        scroll-snap-type: x proximity;
+        scrollbar-color: #cbd5e1 transparent;
+        scrollbar-width: thin;
+
+        &::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: #cbd5e1;
+        }
 
         button {
-            min-height: 38px;
-            padding: 0 16px;
+            min-height: 40px;
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            padding: 0 17px;
             border: 1px solid $demo-border;
             border-radius: 999px;
             background: #ffffff;
             color: #475569;
+            font-size: 13px;
             font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
             cursor: pointer;
+            scroll-snap-align: start;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, .035);
             transition:
                 border-color 0.2s ease,
                 background 0.2s ease,
                 color 0.2s ease,
-                transform 0.2s ease;
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
 
             &:hover {
-                border-color: #94a3b8;
-                background: #f8fafc;
-                color: #111827;
+                border-color: #c4b5fd;
+                background: #faf5ff;
+                color: #7c3aed;
                 transform: translateY(-1px);
+            }
+
+            &:focus-visible {
+                outline: 3px solid rgba(147, 51, 234, .18);
+                outline-offset: 2px;
             }
 
             &.active {
                 border-color: transparent;
                 background: linear-gradient(135deg, #9333ea, #ec4899);
                 color: #ffffff;
+                box-shadow: 0 8px 18px rgba(147, 51, 234, .2);
             }
         }
     }
@@ -508,6 +545,25 @@ $demo-amber: #f59e0b;
         &__primary,
         &__secondary {
             flex: 1 1 150px;
+        }
+
+        .categories {
+            width: calc(100% + 16px);
+            margin-right: -16px;
+            padding-right: 16px;
+        }
+    }
+}
+
+@media (max-width: 560px) {
+    .demo-section .categories {
+        gap: 8px;
+        margin-bottom: 16px;
+
+        button {
+            min-height: 38px;
+            padding-inline: 14px;
+            font-size: 12px;
         }
     }
 }
