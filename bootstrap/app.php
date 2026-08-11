@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureCustomerAccess;
 use App\Http\Middleware\EnsureVerifiedAdmin;
+use App\Http\Middleware\RequireCustomerLogin;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'customer.access' => EnsureCustomerAccess::class,
+            'customer.login' => RequireCustomerLogin::class,
             'verified.admin' => EnsureVerifiedAdmin::class,
         ]);
 

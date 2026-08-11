@@ -662,7 +662,8 @@ $login-success: #15803d;
     }
 
     &__error,
-    &__success {
+    &__success,
+    &__notice {
         margin: 0;
         padding: 12px 14px;
         border-radius: 8px;
@@ -681,6 +682,23 @@ $login-success: #15803d;
         border: 1px solid #bbf7d0;
         background: #f0fdf4;
         color: $login-success;
+    }
+
+    &__notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1e40af;
+
+        svg {
+            width: 19px;
+            height: 19px;
+            flex: 0 0 19px;
+            margin-top: 1px;
+            fill: #2563eb;
+        }
     }
 
     &__meta {

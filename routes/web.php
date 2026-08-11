@@ -56,7 +56,7 @@ Route::view('/gatebook', 'layouts.customers.gatebook')->name('gatebook');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'customer.access'])->group(function () {    // Dashboard
+Route::middleware(['customer.login', 'customer.access'])->group(function () {    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 

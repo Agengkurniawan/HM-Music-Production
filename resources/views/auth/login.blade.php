@@ -48,6 +48,15 @@
                     <p class="login-form__success">{{ session('success') }}</p>
                 @endif
 
+                @if (session('auth_notice'))
+                    <div class="login-form__notice" role="alert">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M10 1.667a8.333 8.333 0 1 0 0 16.666A8.333 8.333 0 0 0 10 1.667Zm.833 12.5H9.167V8.333h1.666v5.834ZM10 6.667a1.042 1.042 0 1 1 0-2.084 1.042 1.042 0 0 1 0 2.084Z" />
+                        </svg>
+                        <span>{{ session('auth_notice') }}</span>
+                    </div>
+                @endif
+
                 <label class="login-form__field" for="email">
                     <span>Email</span>
                     <span class="login-form__control">
