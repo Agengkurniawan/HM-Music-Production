@@ -58,11 +58,18 @@ $modal-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
     }
 }
 
+// Modal: blur halaman di belakang tanpa memburamkan isi modal
+.modal-backdrop.show {
+    opacity: 1;
+    background-color: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
 // Modal: wrapper .modal.fade dan surface utama
 .modal.fade {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background-color: transparent !important;
+
     .modal-content {
         position: relative;
         overflow: hidden;
