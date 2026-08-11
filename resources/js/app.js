@@ -374,6 +374,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //Icon Dropdown
 document.addEventListener("DOMContentLoaded", () => {
+    // Menjaga modal di luar wrapper halaman agar blur hanya mengenai latar.
+    document.querySelectorAll(".modal").forEach((modal) => {
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+    });
+
+    const blurLayer = document.createElement("div");
+    blurLayer.className = "modal-blur-layer";
+    blurLayer.setAttribute("aria-hidden", "true");
+    document.body.appendChild(blurLayer);
+
+    document.addEventListener("show.bs.modal", () => {
+        blurLayer.classList.add("is-active");
+    });
+
+    document.addEventListener("hidden.bs.modal", () => {
+        if (!document.querySelector(".modal.show")) {
+            blurLayer.classList.remove("is-active");
+        }
+    });
+
     const initFilterSelect = (selector) => {
         const elements = document.querySelectorAll(selector);
 
