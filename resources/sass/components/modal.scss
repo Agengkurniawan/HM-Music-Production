@@ -66,6 +66,13 @@ $modal-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
     -webkit-backdrop-filter: blur(6px);
 }
 
+// Fallback untuk browser/server rendering yang tidak menerapkan backdrop-filter.
+// Bootstrap memindahkan modal dan backdrop menjadi anak langsung <body>, jadi
+// hanya konten halaman di luar keduanya yang diburamkan.
+body.modal-open > :not(.modal):not(.modal-backdrop):not(script) {
+    filter: blur(6px);
+}
+
 // Modal: wrapper .modal.fade dan surface utama
 .modal.fade {
     background-color: transparent !important;
