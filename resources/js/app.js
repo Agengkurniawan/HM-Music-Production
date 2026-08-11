@@ -2,6 +2,40 @@ import "./bootstrap";
 import TomSelect from "tom-select";
 import "tom-select/dist/css/tom-select.css";
 
+// Customer mobile navigation
+document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.querySelector("[data-customer-sidebar]");
+    const toggle = document.querySelector("[data-customer-nav-toggle]");
+    const close = document.querySelector("[data-customer-nav-close]");
+    const backdrop = document.querySelector("[data-customer-nav-backdrop]");
+
+    if (!sidebar || !toggle || !backdrop) return;
+
+    const setOpen = (isOpen) => {
+        sidebar.classList.toggle("is-open", isOpen);
+        backdrop.classList.toggle("is-open", isOpen);
+        document.body.classList.toggle("customer-nav-open", isOpen);
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        sidebar.setAttribute("aria-hidden", String(!isOpen && window.innerWidth <= 900));
+    };
+
+    toggle.addEventListener("click", () => setOpen(!sidebar.classList.contains("is-open")));
+    close?.addEventListener("click", () => setOpen(false));
+    backdrop.addEventListener("click", () => setOpen(false));
+    sidebar.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
+        if (window.innerWidth <= 900) setOpen(false);
+    }));
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") setOpen(false);
+    });
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 900) setOpen(false);
+        else sidebar.setAttribute("aria-hidden", String(!sidebar.classList.contains("is-open")));
+    });
+
+    sidebar.setAttribute("aria-hidden", String(window.innerWidth <= 900));
+});
+
 // Notifikasi
 document.addEventListener("DOMContentLoaded", function () {
     const notificationButtons = document.querySelectorAll(

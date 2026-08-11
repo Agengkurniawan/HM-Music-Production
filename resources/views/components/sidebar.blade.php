@@ -1,4 +1,5 @@
-<section class="sidebar">
+<section class="sidebar" id="customerSidebar" data-customer-sidebar aria-label="Navigasi customer">
+    <button class="customer-nav-close" type="button" data-customer-nav-close aria-label="Tutup menu navigasi">&times;</button>
     @php
         $isStyleActive = request()->routeIs('stylesampling');
         $activeStyleType = request('type', 'style');
@@ -160,6 +161,8 @@
 
     </div>
 </section>
+
+<button class="customer-nav-backdrop" type="button" data-customer-nav-backdrop aria-label="Tutup menu navigasi" tabindex="-1"></button>
 
 @include('components.modal', [
     'genres' => $genres ?? [],

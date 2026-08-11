@@ -1,0 +1,285 @@
+// Shared responsive shell for every authenticated customer page.
+// Loaded after the page-specific styles so all customer screens use one breakpoint.
+.customer-nav-toggle,
+.customer-nav-close,
+.customer-nav-backdrop {
+    display: none;
+}
+
+.content,
+.demo,
+.stylesampling,
+.subcription,
+.gatebook-layout {
+    min-width: 0;
+
+    .hall-second {
+        min-width: 0;
+        overflow-x: clip;
+    }
+
+    img,
+    video,
+    audio {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    body.customer-nav-open {
+        overflow: hidden;
+    }
+
+    .sidebar {
+        z-index: 1200;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: min(290px, calc(100vw - 44px));
+        height: 100dvh;
+        margin: 0;
+        padding: 24px 18px;
+        border-radius: 0 24px 24px 0;
+        overflow-y: auto;
+        visibility: hidden;
+        transform: translateX(-105%);
+        transition: transform .25s ease, visibility .25s ease;
+
+        &.is-open {
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .hall-first,
+        .atasbawah {
+            min-height: 100%;
+            height: auto;
+        }
+    }
+
+    .customer-nav-close {
+        position: absolute;
+        z-index: 2;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        background: rgba(255,255,255,.1);
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .customer-nav-backdrop {
+        position: fixed;
+        z-index: 1190;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+        background: rgba(15, 23, 42, .52);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .25s ease, visibility .25s ease;
+
+        &.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    .content,
+    .demo,
+    .stylesampling,
+    .subcription,
+    .gatebook-layout {
+        .content-hall-first {
+            display: block;
+        }
+
+        .hall-second {
+            width: 100%;
+            padding: 14px;
+        }
+    }
+
+    .sectionprofil {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 8px 0 18px;
+        border-radius: 0;
+
+        .page-header {
+            min-width: 0;
+
+            &__title {
+                font-size: clamp(1.45rem, 5vw, 1.85rem);
+                overflow-wrap: anywhere;
+            }
+
+            &__subtitle {
+                line-height: 1.45;
+            }
+        }
+
+        .profil {
+            flex-wrap: nowrap;
+            gap: 10px;
+            padding: 8px;
+
+            .profilview {
+                width: 38px;
+                height: 38px;
+                flex-basis: 38px;
+            }
+
+            .profilname {
+                display: none;
+            }
+        }
+    }
+
+    .customer-nav-toggle {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: 0 5px 14px rgba(15,23,42,.06);
+        cursor: pointer;
+
+        span {
+            width: 18px;
+            height: 2px;
+            border-radius: 999px;
+            background: #111827;
+        }
+    }
+
+    .customer-contact--customer {
+        width: auto;
+        margin: 8px 14px 1px;
+    }
+
+    .pricing-header,
+    .demo-section__header,
+    .style-page__header,
+    .gatebook-hero {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .content,
+    .demo,
+    .stylesampling,
+    .subcription,
+    .gatebook-layout {
+        .hall-second {
+            padding: 10px;
+        }
+    }
+
+    .sectionprofil {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+
+        .page-header__subtitle {
+            display: none;
+        }
+    }
+
+    .dashboard-wrapper,
+    .sectionprofil-2,
+    .sectionprofil-4,
+    .sectionprofil-6,
+    .gatebook {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .dashboard-hero,
+    .pricing-header,
+    .demo-section__header,
+    .style-page__header,
+    .gatebook-hero,
+    .gatebook-section,
+    .plan-card {
+        padding: 20px;
+    }
+
+    .dashboard-hero__actions,
+    .style-page__upgrade,
+    .sampling-request-form__actions {
+        width: 100%;
+        flex-direction: column;
+
+        a,
+        button {
+            width: 100%;
+        }
+    }
+
+    .demo-section .filters,
+    .style-page .filters,
+    .style-card__downloads,
+    .subscription-benefits,
+    .pricing-wrapper {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .demo-section .demo-grid,
+    .style-page .style-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notification-panel.active {
+        width: 100vw;
+    }
+
+    .customer-contact--customer {
+        margin-inline: 10px;
+    }
+}
+
+@media (max-width: 420px) {
+    .sectionprofil {
+        gap: 8px;
+
+        .page-header__title {
+            font-size: 1.25rem;
+        }
+
+        .profil .profilview {
+            display: none;
+        }
+    }
+
+    .customer-nav-toggle {
+        width: 38px;
+        height: 38px;
+    }
+
+    .dashboard-hero,
+    .pricing-header,
+    .demo-section__header,
+    .style-page__header,
+    .gatebook-hero,
+    .gatebook-section,
+    .plan-card {
+        padding: 16px;
+    }
+}

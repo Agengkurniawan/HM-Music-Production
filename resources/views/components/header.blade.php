@@ -1,4 +1,7 @@
 <div class="sectionprofil">
+    <button class="customer-nav-toggle" type="button" data-customer-nav-toggle aria-controls="customerSidebar" aria-expanded="false" aria-label="Buka menu navigasi">
+        <span></span><span></span><span></span>
+    </button>
     @php
         $headerUser = auth()->user();
         $headerName = $headerUser?->name ?: 'Customer';
