@@ -229,6 +229,15 @@
                                     $samplingOrderPack = $request->pack_name
                                         ? \App\Models\StyleSampling::normalizeSamplingPackName($request->pack_name)
                                         : 'Sampling Voice Pack';
+                                    $samplingStatusLabel = match ($request->status) {
+                                        \App\Models\SamplingRequest::STATUS_PENDING_PAYMENT => 'Menunggu Pembayaran',
+                                        \App\Models\SamplingRequest::STATUS_PAID => 'Menunggu File N27',
+                                        \App\Models\SamplingRequest::STATUS_N27_UPLOADED,
+                                        \App\Models\SamplingRequest::STATUS_PROCESSING => 'Diproses',
+                                        \App\Models\SamplingRequest::STATUS_READY,
+                                        \App\Models\SamplingRequest::STATUS_COMPLETED => 'Selesai',
+                                        default => $request->status,
+                                    };
                                 @endphp
                                 <article
                                     class="sampling-order-card"
@@ -241,7 +250,7 @@
                                             <p>{{ $samplingOrderPack }}</p>
                                         </div>
                                         <strong class="sampling-status sampling-status--{{ $request->status_class }}">
-                                            {{ $request->status }}
+                                            {{ $samplingStatusLabel }}
                                         </strong>
                                     </div>
 

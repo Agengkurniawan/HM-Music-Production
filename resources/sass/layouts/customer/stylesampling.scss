@@ -1085,14 +1085,45 @@ $style-rose: #e11d48;
     background: #f1f5f9;
     color: #475569;
 
-    &--pending-payment,
-    &--processing { background: #faf5ff; color: #7e22ce; }
+    &::before {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 8px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 0 4px color-mix(in srgb, currentColor, transparent 82%);
+        content: "";
+    }
 
-    &--paid,
-    &--n27-uploaded { background: #f0fdf4; color: #15803d; }
+    &--pending-payment { background: #fff1f2; color: #e11d48; }
+
+    &--paid { background: #eff6ff; color: #2563eb; }
+
+    &--n27-uploaded,
+    &--processing { background: #faf5ff; color: #7c3aed; }
 
     &--ready,
-    &--completed { background: #f0fdf4; color: #15803d; }
+    &--completed { background: #f0fdf4; color: #16a34a; }
+}
+
+.sampling-order-card__payment {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    box-shadow: inset 3px 0 0 #e11d48;
+
+    strong { color: #9f1239; }
+    span { color: #6b5b61; }
+
+    button {
+        border-color: #be123c;
+        background: #be123c;
+
+        &:hover {
+            border-color: #9f1239;
+            background: #9f1239;
+        }
+    }
 }
 
 .style-card {
