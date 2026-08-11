@@ -36,7 +36,7 @@
                     <div class="pricing-header">
                         <div>
                             <span>Paket Langganan</span>
-                            <h2>Buka Akses Style STY Premium</h2>
+                            <h2>Buka Akses Style Premium</h2>
                             <p>Lihat katalog style terlebih dahulu, lalu aktifkan subscription untuk mengunduh file STY. Sampling voice pack dibeli terpisah jika style membutuhkan voice kit yang sesuai.</p>
                         </div>
                         <div class="pricing-header__mark" aria-hidden="true">
