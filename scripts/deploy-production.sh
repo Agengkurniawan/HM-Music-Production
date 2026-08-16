@@ -48,7 +48,7 @@ else
 fi
 
 mkdir -p storage/framework
-exec 9>storage/framework/hm-production-deploy.lock
+exec 9>storage/framework/cache/hm-production-deploy.lock
 
 if command -v flock >/dev/null 2>&1 && ! flock -n 9; then
     echo 'Another production deployment is already running.' >&2
