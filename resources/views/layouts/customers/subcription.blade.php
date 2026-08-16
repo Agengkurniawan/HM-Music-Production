@@ -4,28 +4,28 @@
 <section class="subcription">
     <div class="content-hall-first">
         @php
-            $styleProducts = collect($styleProducts ?? []);
-            $plans = $plans ?? [];
-            $premiumPlan = $plans['premium_monthly'] ?? [
-                'name' => 'Premium Monthly',
-                'price' => \App\Models\SiteSetting::DEFAULT_SUBSCRIPTION_PRICE,
-                'period_label' => '/bulan',
-            ];
-            $currentSubscription = $currentSubscription ?? null;
-            $hasActiveSubscription = $hasActiveSubscription ?? false;
-            $periodLabelIndonesia = match($premiumPlan['period_label'] ?? null) {
-                '/90 days' => '/90 hari',
-                '/year' => '/tahun',
-                default => '/bulan',
-            };
-            $premiumActionLabel = auth()->check()
-                ? ($hasActiveSubscription ? 'Perpanjang Paket' : 'Perbarui Akses STY')
-                : 'Daftar atau Perbarui';
+        $styleProducts = collect($styleProducts ?? []);
+        $plans = $plans ?? [];
+        $premiumPlan = $plans['premium_monthly'] ?? [
+        'name' => 'Premium Monthly',
+        'price' => \App\Models\SiteSetting::DEFAULT_SUBSCRIPTION_PRICE,
+        'period_label' => '/bulan',
+        ];
+        $currentSubscription = $currentSubscription ?? null;
+        $hasActiveSubscription = $hasActiveSubscription ?? false;
+        $periodLabelIndonesia = match($premiumPlan['period_label'] ?? null) {
+        '/90 days' => '/90 hari',
+        '/year' => '/tahun',
+        default => '/bulan',
+        };
+        $premiumActionLabel = auth()->check()
+        ? ($hasActiveSubscription ? 'Perpanjang Paket' : 'Perbarui Akses STY')
+        : 'Daftar atau Perbarui';
         @endphp
 
         @include('components.sidebar', [
-            'hideLogout' => ! auth()->check(),
-            'styleProducts' => $styleProducts,
+        'hideLogout' => ! auth()->check(),
+        'styleProducts' => $styleProducts,
         ])
 
         <div class="hall-second">
@@ -49,18 +49,18 @@
                     </div>
 
                     @if(session('success'))
-                        <div class="payment-alert">
-                            <strong>{{ session('success') }}</strong>
-                            @if(session('payment_reference'))
-                                <span>Referensi pembayaran: {{ session('payment_reference') }}</span>
-                            @endif
-                        </div>
+                    <div class="payment-alert">
+                        <strong>{{ session('success') }}</strong>
+                        @if(session('payment_reference'))
+                        <span>Referensi pembayaran: {{ session('payment_reference') }}</span>
+                        @endif
+                    </div>
                     @endif
 
                     @if($errors->getBag('default')->any() || $errors->subscriptionAccess->any())
-                        <div class="payment-alert payment-alert--error">
-                            <strong>{{ $errors->subscriptionAccess->first() ?: $errors->getBag('default')->first() }}</strong>
-                        </div>
+                    <div class="payment-alert payment-alert--error">
+                        <strong>{{ $errors->subscriptionAccess->first() ?: $errors->getBag('default')->first() }}</strong>
+                    </div>
                     @endif
 
                     <div class="pricing-wrapper">
@@ -112,17 +112,17 @@
                             <p class="desc">Buka akses download style premium. Sampling voice pack tetap dibeli terpisah untuk setiap pack.</p>
 
                             @if(auth()->check())
-                                <div class="plan-card__status {{ $hasActiveSubscription ? 'is-active' : 'is-expired' }}">
-                                    <strong>{{ $hasActiveSubscription ? 'Premium Aktif' : 'Akses STY Terkunci' }}</strong>
-                                    <span>
-                                        @if($currentSubscription?->expires_at)
-                                            {{ $hasActiveSubscription ? 'Aktif sampai' : 'Berakhir pada' }}
-                                            {{ $currentSubscription->expires_at->format('d/m/Y') }}
-                                        @else
-                                            {{ $hasActiveSubscription ? 'Tanpa tanggal berakhir' : 'Perbarui dengan email yang terdaftar' }}
-                                        @endif
-                                    </span>
-                                </div>
+                            <div class="plan-card__status {{ $hasActiveSubscription ? 'is-active' : 'is-expired' }}">
+                                <strong>{{ $hasActiveSubscription ? 'Premium Aktif' : 'Akses STY Terkunci' }}</strong>
+                                <span>
+                                    @if($currentSubscription?->expires_at)
+                                    {{ $hasActiveSubscription ? 'Aktif sampai' : 'Berakhir pada' }}
+                                    {{ $currentSubscription->expires_at->format('d/m/Y') }}
+                                    @else
+                                    {{ $hasActiveSubscription ? 'Tanpa tanggal berakhir' : 'Perbarui dengan email yang terdaftar' }}
+                                    @endif
+                                </span>
+                            </div>
                             @endif
 
                             <ul class="features">

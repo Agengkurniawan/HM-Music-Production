@@ -27,6 +27,12 @@
                         : ($selectedPackLabel ? "{$selectedPackLabel} Styles" : ($selectedCategory ? "{$selectedCategory} Styles" : 'Style Library'));
                     $downloadErrors = $errors->styleDownload;
                     $autoOpenPaymentRequestId = session('sampling_payment_request_id');
+                    $aiSearchEnabled = $aiSearchEnabled ?? false;
+                    $aiSearchPerformed = $aiSearchPerformed ?? false;
+                    $aiQuery = $aiQuery ?? null;
+                    $aiError = $aiError ?? null;
+                    $aiEmptyMessage = $aiEmptyMessage ?? null;
+                    $aiUnderstanding = $aiUnderstanding ?? null;
                 @endphp
 
                 <div class="style-page">
@@ -55,38 +61,75 @@
                         </div>
                     </div>
 
-                    <div class="filters">
-                        <label>
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <circle cx="11" cy="11" r="8" />
-                                <path d="M21 21l-4.35-4.35" />
-                            </svg>
-                            <input type="text" placeholder="{{ $isSamplingView ? 'Search sampling orders...' : 'Search style downloads...' }}" data-style-search-input>
-                        </label>
-                        <select aria-label="Filter style category" data-style-filter="category">
-                            @if($isSamplingView)
+                    @if($isSamplingView)
+                        <div class="filters">
+                            <label>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+                                <input type="text" placeholder="Search sampling orders..." data-style-search-input>
+                            </label>
+                            <select aria-label="Filter style category" data-style-filter="category">
                                 <option value="" selected>Style Categories</option>
-                            @endif
-                            <option value="{{ route('stylesampling', array_filter(['type' => 'style', 'pack' => $assetType === 'style' ? $selectedPack : null])) }}" @selected($assetType === 'style' && !$selectedCategory)>All Styles</option>
-                            @foreach($styleCategories as $category)
-                                <option value="{{ route('stylesampling', array_filter(['type' => 'style', 'category' => $category, 'pack' => $assetType === 'style' ? $selectedPack : null])) }}" @selected($assetType === 'style' && $selectedCategory === $category)>{{ $category }}</option>
-                            @endforeach
-                        </select>
-                        <select aria-label="Filter expansion pack" data-style-filter="pack">
-                            @if($isSamplingView)
+                                <option value="{{ route('stylesampling', ['type' => 'style']) }}">All Styles</option>
+                            </select>
+                            <select aria-label="Filter expansion pack" data-style-filter="pack">
                                 <option value="{{ route('stylesampling', ['type' => 'sampling']) }}" @selected(!$selectedPack)>All Sampling Packs</option>
                                 @foreach($samplingPackOptions as $packName => $pack)
                                     <option value="{{ route('stylesampling', ['type' => 'sampling', 'pack' => $packName]) }}" @selected($selectedPack === $packName)>{{ $pack['label'] }}</option>
                                 @endforeach
-                            @else
-                                <option value="{{ route('stylesampling', array_filter(['type' => 'style', 'category' => $selectedCategory])) }}" @selected(!$selectedPack)>All Style Packs</option>
-                                @foreach($stylePacks as $packName)
-                                    <option value="{{ route('stylesampling', array_filter(['type' => 'style', 'category' => $selectedCategory, 'pack' => $packName])) }}" @selected($selectedPack === $packName)>{{ $packName }}</option>
-                                @endforeach
-                                <option value="{{ route('stylesampling', ['type' => 'sampling']) }}">Beli Sampling Pack</option>
+                            </select>
+                        </div>
+                    @else
+                        <section class="unified-style-search">
+                            <div class="unified-style-search__heading">
+                                <span aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+                                </span>
+                                <div>
+                                    <span>Smart Search</span>
+                                    <h2>Cari Style yang Anda Butuhkan</h2>
+                                    <p>Temukan Style dari judul lagu, artis, atau kebutuhan musik Anda.</p>
+                                </div>
+                            </div>
+                            <form class="filters" action="{{ route('stylesampling.ai-search') }}" method="POST" data-unified-style-search>
+                                @csrf
+                                <label>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+                                    <input type="search" name="query" value="{{ old('query', $aiQuery) }}" minlength="3" maxlength="300" required autocomplete="off" placeholder="Cari style, judul lagu, artis, atau referensi musik..." aria-label="Cari Style" data-unified-style-query>
+                                    <button type="submit" class="unified-style-search__submit">Cari</button>
+                                </label>
+                                <select name="category" aria-label="Filter style category" data-unified-style-filter>
+                                    <option value="">All Styles</option>
+                                    @foreach($styleCategories as $category)
+                                        <option value="{{ $category }}" @selected(old('category', $selectedCategory) === $category)>{{ $category }}</option>
+                                    @endforeach
+                                </select>
+                                <select name="pack" aria-label="Filter expansion pack" data-unified-style-filter>
+                                    <option value="">All Style Packs</option>
+                                    @foreach($stylePacks as $packName)
+                                        <option value="{{ $packName }}" @selected(old('pack', $selectedPack) === $packName)>{{ $packName }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                            <p class="unified-style-search__helper"><strong>Contoh:</strong> Pingal, Didi Kempot, Denny Caknan, Negoro Angin, atau koplo untuk hajatan. Tekan Enter untuk mencari.</p>
+                            @error('query')
+                                <p class="unified-style-search__error">{{ $message }}</p>
+                            @enderror
+                            @if($aiError)
+                                <p class="unified-style-search__error">{{ $aiError }}</p>
+                            @elseif($aiSearchPerformed)
+                                @if(($aiUnderstanding['intent'] ?? null) === 'lyric' && filled($aiUnderstanding['song_title'] ?? null))
+                                    <p class="unified-style-search__identified">
+                                        Lirik dikenali sebagai <strong>{{ $aiUnderstanding['song_title'] }}</strong>
+                                        @if(filled($aiUnderstanding['artist'] ?? null)) oleh {{ $aiUnderstanding['artist'] }} @endif
+                                    </p>
+                                @endif
+                                <div class="unified-style-search__result">
+                                    <p><span aria-hidden="true">✓</span> Hasil untuk <strong>&ldquo;{{ $aiQuery }}&rdquo;</strong></p>
+                                    <a href="{{ route('stylesampling', ['type' => 'style']) }}"><span aria-hidden="true">×</span> Tampilkan Semua Style</a>
+                                </div>
                             @endif
-                        </select>
-                    </div>
+                        </section>
+                    @endif
 
                     @if(session('success'))
                         <div class="style-page__notice style-page__notice--success">
@@ -458,8 +501,17 @@
                                         <div>
                                             <h2>{{ $style->name }}</h2>
                                             <p>{{ $stylePackName ?? 'Single Style' }}</p>
+                                            @if($aiSearchPerformed && $style->hasTrustedAiMetadata() && $style->ai_artist)
+                                                <p class="style-card__ai-artist">{{ $style->ai_artist }}</p>
+                                            @endif
                                         </div>
                                         <div class="style-card__meta">
+                                            @if($aiSearchPerformed && $style->ai_match_label)
+                                                <span class="style-card__catalog-match">{{ $style->ai_match_label }}</span>
+                                            @endif
+                                            @if($aiSearchPerformed && is_numeric($style->ai_similarity))
+                                                <span class="style-card__ai-score">Relevansi AI: {{ number_format(max(0, min(1, $style->ai_similarity)) * 100, 0) }}%</span>
+                                            @endif
                                             <span>Published</span>
                                             <span>STY Download</span>
                                             <span>Subscription</span>
@@ -487,8 +539,8 @@
                                 </article>
                             @empty
                                 <div class="style-page__empty">
-                                    <strong>No styles found</strong>
-                                    <span>Try choosing another style category from the sidebar.</span>
+                                    <strong>{{ $aiSearchPerformed ? 'Belum ada Style yang relevan' : 'No styles found' }}</strong>
+                                    <span>{{ $aiSearchPerformed ? ($aiEmptyMessage ?: 'Coba jelaskan kebutuhan Anda dengan kata-kata lain atau gunakan pencarian biasa.') : 'Try choosing another style category from the sidebar.' }}</span>
                                 </div>
                             @endforelse
                         </div>
@@ -502,6 +554,27 @@
 
 @push('script')
 <script>
+    document.querySelectorAll('[data-unified-style-search]').forEach((form) => {
+        const queryInput = form.querySelector('[data-unified-style-query]');
+        const category = form.querySelector('select[name="category"]');
+        const pack = form.querySelector('select[name="pack"]');
+
+        form.querySelectorAll('[data-unified-style-filter]').forEach((filter) => {
+            filter.addEventListener('change', () => {
+                if ((queryInput?.value.trim().length || 0) >= 3) {
+                    form.requestSubmit();
+                    return;
+                }
+
+                const target = new URL(@json(route('stylesampling')), window.location.origin);
+                target.searchParams.set('type', 'style');
+                if (category?.value) target.searchParams.set('category', category.value);
+                if (pack?.value) target.searchParams.set('pack', pack.value);
+                window.location.href = target.toString();
+            });
+        });
+    });
+
     document.querySelectorAll('[data-style-filter]').forEach((filter) => {
         filter.addEventListener('change', () => {
             if (filter.value) {

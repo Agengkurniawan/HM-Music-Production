@@ -9,23 +9,30 @@ use Illuminate\Support\Facades\Storage;
 class StyleSampling extends Model
 {
     public const CATEGORIES = ['Dangdut', 'Campursari', 'Gamelan'];
+
     public const CUSTOMER_STYLE_CATEGORIES = self::CATEGORIES;
+
     public const PACKS = [
         'HM Dangdut Expansion Packs',
         'HM Campursari Expansion Packs',
         'HM Gamelan Expansion Packs',
     ];
+
     public const LEGACY_PACK_ALIASES = [
         'HM Dangdut Koplo Expansion Packs' => 'HM Dangdut Expansion Packs',
         'HM Pop Expansion Packs' => 'HM Campursari Expansion Packs',
     ];
+
     public const PACK_CATEGORY_MAP = [
         'HM Dangdut Expansion Packs' => ['Dangdut'],
         'HM Campursari Expansion Packs' => ['Campursari'],
         'HM Gamelan Expansion Packs' => ['Gamelan'],
     ];
+
     public const SAMPLING_TOTAL_SIZE_MB = 768;
+
     public const SAMPLING_REQUEST_PRICE = 800000;
+
     public const SAMPLING_REQUEST_PACKS = [
         'HM Dangdut Expansion Packs' => [
             'label' => 'Pack 1 - Dangdut',
@@ -78,7 +85,9 @@ class StyleSampling extends Model
             ],
         ],
     ];
+
     public const ACCESSES = ['Free', 'Premium'];
+
     public const STATUSES = ['Draft', 'Published'];
 
     protected $fillable = [
@@ -98,18 +107,42 @@ class StyleSampling extends Model
         'file_size',
         'description',
         'downloads_count',
+        'search_embedding',
+        'embedding_model',
+        'embedding_source_hash',
+        'embedding_updated_at',
+        'ai_song_title',
+        'ai_artist',
+        'ai_genre',
+        'ai_aliases',
+        'ai_search_references',
+        'ai_search_profile',
+        'ai_enrichment_status',
+        'ai_enrichment_source',
+        'ai_enrichment_source_hash',
+        'ai_enrichment_updated_at',
     ];
 
     protected function casts(): array
     {
         return [
             'downloads_count' => 'integer',
+            'search_embedding' => 'array',
+            'embedding_updated_at' => 'datetime',
+            'ai_aliases' => 'array',
+            'ai_search_references' => 'array',
+            'ai_enrichment_updated_at' => 'datetime',
         ];
     }
 
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', 'Published');
+    }
+
+    public function hasTrustedAiMetadata(): bool
+    {
+        return in_array($this->ai_enrichment_status, ['verified', 'probable'], true);
     }
 
     public function getAudioUrlAttribute(): string

@@ -35,7 +35,7 @@ class QualityRegressionTest extends TestCase
         $this->actingAs($this->admin())->put(route('admin.stylesampling.update', $style), [
             'name' => 'Invalid category attempt',
             'category' => 'Arbitrary Category',
-        ])->assertSessionHasErrors('category');
+        ])->assertSessionHasErrors('category', null, 'editStyle');
 
         $this->assertSame('Dangdut', $style->refresh()->category);
     }
@@ -96,7 +96,7 @@ class QualityRegressionTest extends TestCase
         $this->actingAs($admin)->patch(route('admin.usermanagement.password', $customer), [
             'password' => 'aaaaaaaa',
             'password_confirmation' => 'aaaaaaaa',
-        ])->assertSessionHasErrors('password');
+        ])->assertSessionHasErrors('password', null, 'adminUserPassword');
 
         $this->actingAs($admin)->patch(route('admin.usermanagement.password', $customer), [
             'password' => 'secure123',

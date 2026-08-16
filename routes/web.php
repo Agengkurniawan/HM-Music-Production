@@ -1,11 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\Auth\SocialAuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\NotificationReadController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\DemoController as AdminDemoController;
 use App\Http\Controllers\Admin\DownloadSalesController;
@@ -14,10 +8,16 @@ use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\StyleSamplingController as AdminStyleSamplingController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Customer\DemoController as CustomerDemoController;
 use App\Http\Controllers\Customer\SamplingRequestController as CustomerSamplingRequestController;
 use App\Http\Controllers\Customer\StyleSamplingController as CustomerStyleSamplingController;
 use App\Http\Controllers\Customer\SubscriptionController as CustomerSubscriptionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationReadController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,7 +49,6 @@ Route::get('/payment/midtrans/finish', [CustomerSubscriptionController::class, '
 Route::post('/payment/midtrans/notification', [CustomerSubscriptionController::class, 'midtransNotification'])->name('payment.midtrans.notification');
 Route::view('/gatebook', 'layouts.customers.gatebook')->name('gatebook');
 
-
 /*
 |--------------------------------------------------------------------------
 | CUSTOMER ROUTES
@@ -62,6 +61,9 @@ Route::middleware(['customer.login', 'customer.access'])->group(function () {   
 
     // Style Sampling
     Route::get('/stylesampling', [CustomerStyleSamplingController::class, 'index'])->name('stylesampling');
+    Route::post('/stylesampling/ai-search', [CustomerStyleSamplingController::class, 'aiSearch'])
+        ->middleware('throttle:10,1')
+        ->name('stylesampling.ai-search');
     Route::get('/stylesampling/{styleSampling}/download/style', [CustomerStyleSamplingController::class, 'downloadStyle'])
         ->name('stylesampling.download.style');
     Route::post('/sampling-requests', [CustomerSamplingRequestController::class, 'store'])
@@ -75,7 +77,6 @@ Route::middleware(['customer.login', 'customer.access'])->group(function () {   
 
     // Subscription
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,7 @@ Route::middleware('verified.admin')->group(function () {
     Route::put('/admin/style-sampling/{styleSampling}', [AdminStyleSamplingController::class, 'update'])->name('admin.stylesampling.update');
     Route::patch('/admin/style-sampling/{styleSampling}/activate', [AdminStyleSamplingController::class, 'activate'])->name('admin.stylesampling.activate');
     Route::patch('/admin/style-sampling/{styleSampling}/deactivate', [AdminStyleSamplingController::class, 'deactivate'])->name('admin.stylesampling.deactivate');
+    Route::patch('/admin/style-sampling/{styleSampling}/ai-metadata', [AdminStyleSamplingController::class, 'refreshAiMetadata'])->name('admin.stylesampling.ai-metadata');
     Route::delete('/admin/style-sampling/{styleSampling}', [AdminStyleSamplingController::class, 'destroy'])->name('admin.stylesampling.destroy');
 
     Route::get('/admin/sampling-requests', [AdminSamplingRequestController::class, 'index'])->name('admin.sampling-requests');

@@ -162,7 +162,7 @@ class SubscriptionTestCheckoutTest extends TestCase
             'method' => 'Midtrans Snap Sandbox',
         ]);
 
-        $response->assertSessionHasErrors('password');
+        $response->assertSessionHasErrors('password', null, 'subscriptionCheckout');
 
         $this->assertGuest();
         $this->assertDatabaseCount('payments', 0);
@@ -236,7 +236,7 @@ class SubscriptionTestCheckoutTest extends TestCase
             'package' => 'Premium Monthly',
             'amount' => 55000,
             'method' => 'Midtrans Snap Production',
-        ])->assertSessionHasErrors('method');
+        ])->assertSessionHasErrors('method', null, 'subscriptionCheckout');
 
         $payment = Payment::where('customer_email', 'wrong-key@example.com')->firstOrFail();
 

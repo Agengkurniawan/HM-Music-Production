@@ -117,7 +117,7 @@ class DemoYoutubeTest extends TestCase
             'status' => 'Published',
         ]);
 
-        $response->assertSessionHasErrors('youtube_url');
+        $response->assertSessionHasErrors('youtube_url', null, 'demoCreate');
         $this->assertDatabaseCount('music_demos', 0);
     }
 
@@ -197,8 +197,7 @@ class DemoYoutubeTest extends TestCase
             'status' => 'Published',
         ]);
 
-        $response->assertSessionHasErrors('youtube_url');
+        $response->assertSessionHasErrors('youtube_url', null, 'demoCreate');
         $this->assertDatabaseCount('music_demos', 0);
     }
-
 }

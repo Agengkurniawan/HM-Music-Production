@@ -447,5 +447,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     initFilterSelect("[data-style-filter]");
+    initFilterSelect("[data-unified-style-filter]");
     initFilterSelect('.sampling-request-form select[name="pack_name"]');
 });

@@ -209,7 +209,7 @@ class SamplingRequestWorkflowTest extends TestCase
         $this->actingAs($customer)
             ->post(route('sampling-requests.payment.sync', $samplingRequest))
             ->assertRedirect(route('stylesampling', ['type' => 'sampling']))
-            ->assertSessionHasErrors('payment');
+            ->assertSessionHasErrors('payment', null, 'samplingPayment');
 
         $this->assertSame(SamplingRequest::PAYMENT_PENDING, $samplingRequest->refresh()->payment_status);
         $this->assertSame('Pending', $payment->refresh()->status);
@@ -244,7 +244,7 @@ class SamplingRequestWorkflowTest extends TestCase
             ->patch(route('admin.sampling-requests.payment', $samplingRequest), [
                 'amount' => 0,
             ])
-            ->assertSessionHasErrors('amount');
+            ->assertSessionHasErrors('amount', null, 'adminSamplingPayment');
 
         $this->assertSame(SamplingRequest::PAYMENT_PENDING, $samplingRequest->refresh()->payment_status);
         $this->assertNull($samplingRequest->payment_id);

@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\StyleSampling;
 use App\Models\User;
 use App\Notifications\StyleCatalogUpdated;
-use App\Models\StyleSampling;
+use App\Services\AI\CatalogEnrichmentService;
+use App\Services\AI\StyleEmbeddingIndexer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class StyleSamplingController extends Controller
@@ -68,6 +70,8 @@ class StyleSamplingController extends Controller
 
         $styleSampling->save();
 
+        $this->refreshAiData($styleSampling);
+
         $this->notifyCustomersAboutStyle($styleSampling, 'added');
 
         return back()->with('success', 'Style uploaded successfully.');
@@ -83,6 +87,8 @@ class StyleSamplingController extends Controller
         ]);
 
         $styleSampling->update($validated);
+
+        $this->refreshAiData($styleSampling);
 
         $this->notifyCustomersAboutStyle($styleSampling, 'updated');
 
@@ -124,6 +130,36 @@ class StyleSamplingController extends Controller
         return back()->with('success', 'Style sampling moved to draft.');
     }
 
+    public function refreshAiMetadata(
+        StyleSampling $styleSampling,
+        CatalogEnrichmentService $enrichment,
+        StyleEmbeddingIndexer $indexer,
+    ): RedirectResponse {
+        if (! config('services.ai_enrichment.enabled')) {
+            return back()->withErrors([
+                'ai_metadata' => 'AI catalog enrichment is currently disabled.',
+            ], 'styleAction');
+        }
+
+        try {
+            $result = $enrichment->enrich($styleSampling, true);
+
+            if (config('services.ai_search.enabled')) {
+                $indexer->index($styleSampling->refresh());
+            }
+
+            return back()->with('success', $result === 'enriched'
+                ? 'AI search metadata refreshed successfully.'
+                : 'AI metadata refreshed; this Style was not confidently recognized as a song.');
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'ai_metadata' => 'AI metadata could not be refreshed. The Style data was not changed.',
+            ], 'styleAction');
+        }
+    }
+
     public function destroy(StyleSampling $styleSampling): RedirectResponse
     {
         $storedFiles = array_filter([
@@ -162,20 +198,43 @@ class StyleSamplingController extends Controller
 
     private function notifyCustomersAboutStyle(StyleSampling $styleSampling, string $action): void
     {
-    if ($styleSampling->status !== 'Published') {
-        return;
+        if ($styleSampling->status !== 'Published') {
+            return;
+        }
+
+        try {
+            User::query()
+                ->where('role', 'customer')
+                ->where('status', '<>', 'Suspended')
+                ->whereNotNull('email')
+                ->chunkById(100, function ($customers) use ($styleSampling, $action): void {
+                    Notification::send($customers, new StyleCatalogUpdated($styleSampling, $action));
+                });
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
-    try {
-        User::query()
-            ->where('role', 'customer')
-            ->where('status', '<>', 'Suspended')
-            ->whereNotNull('email')
-            ->chunkById(100, function ($customers) use ($styleSampling, $action): void {
-                Notification::send($customers, new StyleCatalogUpdated($styleSampling, $action));
-            });
-    } catch (\Throwable $e) {
-        report($e);
+    private function refreshAiData(StyleSampling $styleSampling): void
+    {
+        $enrichment = app(CatalogEnrichmentService::class);
+        $enrichment->markStaleIfNeeded($styleSampling);
+
+        if (config('services.ai_enrichment.enabled')) {
+            try {
+                $enrichment->enrich($styleSampling);
+                $styleSampling->refresh();
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
+        if (config('services.ai_search.enabled')) {
+            try {
+                app(StyleEmbeddingIndexer::class)->index($styleSampling);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
     }
-}
 }

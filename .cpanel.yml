@@ -1,13 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/rm -rf /home/hmmusicp5/public_html/build_next
-    - /bin/cp -a /home/hmmusicp5/HM-Music-Production/public/build /home/hmmusicp5/public_html/build_next
-    - /bin/rm -rf /home/hmmusicp5/public_html/build_previous
-    - /bin/mv /home/hmmusicp5/public_html/build /home/hmmusicp5/public_html/build_previous
-    - /bin/mv /home/hmmusicp5/public_html/build_next /home/hmmusicp5/public_html/build
-    - /bin/cp -a /home/hmmusicp5/HM-Music-Production/public/audio/. /home/hmmusicp5/public_html/audio/
-    - /bin/cp -a /home/hmmusicp5/HM-Music-Production/public/img/. /home/hmmusicp5/public_html/img/
-    - /bin/cp /home/hmmusicp5/HM-Music-Production/public/favicon.ico /home/hmmusicp5/public_html/favicon.ico
-    - /bin/cp /home/hmmusicp5/HM-Music-Production/public/robots.txt /home/hmmusicp5/public_html/robots.txt
-    - /opt/cpanel/ea-php84/root/usr/bin/php /home/hmmusicp5/HM-Music-Production/artisan optimize:clear
+    - /bin/bash /home/hmmusicp5/HM-Music-Production/scripts/deploy-production.sh

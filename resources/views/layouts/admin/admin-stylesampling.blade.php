@@ -167,6 +167,11 @@
                                                 <div>
                                                     <strong>{{ $style->name }}</strong>
                                                     <span><b class="style-status style-status--{{ strtolower($style->status) }}">{{ $style->status }}</b> updated {{ $style->updated_at->format('d M Y') }}</span>
+                                                    <span class="style-ai-metadata">
+                                                        AI: {{ ucfirst($style->ai_enrichment_status ?: 'pending') }}
+                                                        @if($style->ai_artist) · {{ $style->ai_artist }} @endif
+                                                        @if($style->ai_song_title) · {{ $style->ai_song_title }} @endif
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
@@ -187,6 +192,11 @@
                                         </td>
                                         <td>
                                             <div class="style-row__actions">
+                                                <form action="{{ route('admin.stylesampling.ai-metadata', $style) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" aria-label="Refresh AI metadata {{ $style->name }}" title="Refresh AI Metadata">AI</button>
+                                                </form>
                                                 @if($style->status === 'Draft')
                                                 <form action="{{ route('admin.stylesampling.activate', $style) }}" method="POST">
                                                     @csrf

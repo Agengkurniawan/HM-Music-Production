@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\CatalogEnrichmentProviderInterface;
+use App\Contracts\EmbeddingProviderInterface;
+use App\Contracts\QueryUnderstandingProviderInterface;
+use App\Services\AI\GeminiCatalogEnrichmentProvider;
+use App\Services\AI\GeminiEmbeddingProvider;
 use App\Support\HeaderNotificationFactory;
 use App\Support\HeaderNotificationReadState;
 use Illuminate\Support\Facades\View;
@@ -14,7 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(EmbeddingProviderInterface::class, GeminiEmbeddingProvider::class);
+        $this->app->bind(CatalogEnrichmentProviderInterface::class, GeminiCatalogEnrichmentProvider::class);
+        $this->app->bind(QueryUnderstandingProviderInterface::class, GeminiCatalogEnrichmentProvider::class);
     }
 
     /**
