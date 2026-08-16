@@ -5,7 +5,8 @@ set -Eeuo pipefail
 readonly APP_ROOT='/home/hmmusicp5/HM-Music-Production'
 readonly PUBLIC_ROOT='/home/hmmusicp5/public_html'
 readonly PHP_BIN='/opt/cpanel/ea-php84/root/usr/bin/php'
-readonly COMPOSER_PHAR='/opt/cpanel/composer/bin/composer'
+readonly COMPOSER_PHAR="$APP_ROOT/storage/app/composer.phar"
+readonly COMPOSER_SHA256='5ee7125f8a30a34d246cefdc0bc85b8a783b28f2aec968994118512350d28027'
 
 if [[ "$APP_ROOT" != '/home/hmmusicp5/HM-Music-Production' ]] ||
    [[ "$PUBLIC_ROOT" != '/home/hmmusicp5/public_html' ]]; then
@@ -31,6 +32,13 @@ if [[ ! -f .env ]] || [[ ! -f artisan ]] || [[ ! -s public/build/manifest.json ]
 fi
 
 if [[ -f "$COMPOSER_PHAR" ]]; then
+    composer_hash=$("$PHP_BIN" -r 'echo hash_file("sha256", $argv[1]);' "$COMPOSER_PHAR")
+
+    if [[ "$composer_hash" != "$COMPOSER_SHA256" ]]; then
+        echo 'The private Composer PHAR failed its integrity check.' >&2
+        exit 1
+    fi
+
     COMPOSER=("$PHP_BIN" "$COMPOSER_PHAR")
 elif command -v composer >/dev/null 2>&1; then
     COMPOSER=("$(command -v composer)")
