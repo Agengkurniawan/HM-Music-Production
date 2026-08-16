@@ -59,6 +59,16 @@ class AiSearchDangdutTestSeederTest extends TestCase
             && in_array($style->category, StyleSampling::CUSTOMER_STYLE_CATEGORIES, true)
             && in_array($style->pack, StyleSampling::PACKS, true)
         ));
+        $this->assertTrue($testRows->every(fn (StyleSampling $style): bool => ! str_contains($style->name, '[TEST]')));
+        $this->assertTrue($testRows->every(
+            fn (StyleSampling $style): bool => $style->style_filename === rtrim($style->name, ' .').'.STY'
+                && $style->style_filename !== 'Sinarengan.STY'
+        ));
+        $this->assertCount(63, $testRows->pluck('style_filename')->unique());
+        $this->assertTrue($testRows->contains(
+            fn (StyleSampling $style): bool => $style->name === 'Negoro Angin - Denny Caknan'
+                && $style->style_filename === 'Negoro Angin - Denny Caknan.STY'
+        ));
 
         $original = $this->template->refresh();
         $this->assertSame('Original Production Template', $original->name);

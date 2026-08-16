@@ -175,10 +175,11 @@ class HybridStyleSearchService
             return collect();
         }
 
+        $entityNeedles = $this->directEntityNeedles($needle);
         $artistMatches = $eligible->filter(fn (StyleSampling $style): bool => $style->hasTrustedAiMetadata()
-            && $this->normalizer->normalize($style->ai_artist) === $needle
+            && in_array($this->normalizer->normalize($style->ai_artist), $entityNeedles, true)
         )->each->setAttribute('ai_match_label', 'Catalog Artist Match');
-        $referenceMatches = $this->referenceMatches($eligible, [$needle])
+        $referenceMatches = $this->referenceMatches($eligible, $entityNeedles)
             ->each->setAttribute('ai_match_label', 'Reference Match');
         $metadataMatchIds = $artistMatches->concat($referenceMatches)->pluck('id')->all();
         $keywordMatches = $eligible->reject(fn (StyleSampling $style): bool => in_array($style->getKey(), $metadataMatchIds, true))
@@ -198,6 +199,18 @@ class HybridStyleSearchService
             ->concat($keywordMatches)
             ->unique('id')
             ->values();
+    }
+
+    /** @return array<int, string> */
+    private function directEntityNeedles(string $normalizedQuery): array
+    {
+        $withoutInstruction = preg_replace(
+            '/^(?:(?:cari|carikan|temukan|tampilkan)\s+)?(?:lagu|musik|style|artis|penyanyi)(?:\s+(?:dari|oleh|punya))?\s+/u',
+            '',
+            $normalizedQuery,
+        ) ?? $normalizedQuery;
+
+        return array_values(array_unique(array_filter([$normalizedQuery, trim($withoutInstruction)])));
     }
 
     /** @param Collection<int, StyleSampling> $eligible @return Collection<int, StyleSampling> */
@@ -308,6 +321,38 @@ class HybridStyleSearchService
             }
         }
 
-        return $query->get();
+        return $this->withoutDummyDuplicates($query->get());
+    }
+
+    /** @param Collection<int, StyleSampling> $styles @return Collection<int, StyleSampling> */
+    private function withoutDummyDuplicates(Collection $styles): Collection
+    {
+        $originalIdentities = $styles
+            ->reject(fn (StyleSampling $style): bool => $style->ai_enrichment_source === 'test_seed')
+            ->map(fn (StyleSampling $style): ?string => $this->catalogIdentity($style))
+            ->filter()
+            ->flip();
+
+        return $styles->reject(function (StyleSampling $style) use ($originalIdentities): bool {
+            if ($style->ai_enrichment_source !== 'test_seed') {
+                return false;
+            }
+
+            $identity = $this->catalogIdentity($style);
+
+            return $identity !== null && $originalIdentities->has($identity);
+        })->values();
+    }
+
+    private function catalogIdentity(StyleSampling $style): ?string
+    {
+        if (! $style->hasTrustedAiMetadata()) {
+            return null;
+        }
+
+        $artist = $this->normalizer->normalize($style->ai_artist);
+        $song = $this->normalizer->normalize($style->ai_song_title);
+
+        return $artist !== '' && $song !== '' ? $artist.'|'.$song : null;
     }
 }

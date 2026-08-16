@@ -6,6 +6,7 @@ use App\Models\StyleSampling;
 use App\Services\AI\CatalogEnrichmentService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class AiSearchDangdutTestSeeder extends Seeder
@@ -25,7 +26,7 @@ class AiSearchDangdutTestSeeder extends Seeder
             throw new RuntimeException('AI test catalog needs one original Published Style with a STY file as its template.');
         }
 
-        $rows = $this->seedFromTemplate($template);
+        $rows = DB::transaction(fn (): Collection => $this->seedFromTemplate($template));
 
         $this->command?->info("AI test catalog ready: {$rows->count()} rows. Template: {$template->name} (#{$template->id}).");
     }
@@ -38,8 +39,12 @@ class AiSearchDangdutTestSeeder extends Seeder
         return collect($this->catalog())->map(function (array $item) use ($template, $enrichment): StyleSampling {
             $category = $item['artist'] === 'Didi Kempot' ? 'Campursari' : 'Dangdut';
             $pack = StyleSampling::samplingPackForCategory($category);
-            $testName = '[TEST] '.$item['title'];
-            $description = self::MARKER.' Data dummy local untuk pengujian Hybrid Intelligent Search. Bukan katalog produksi.';
+            $displayName = $item['title'].' - '.$item['artist'];
+            $description = self::MARKER.' Data dummy katalog untuk pengujian Hybrid Intelligent Search.';
+            $nameIsOwnedByOriginalData = StyleSampling::where('name', $displayName)
+                ->where(fn ($query) => $query->whereNull('description')->orWhere('description', 'not like', '%'.self::MARKER.'%'))
+                ->exists();
+            $catalogName = $nameIsOwnedByOriginalData ? $displayName.' (AI Catalog)' : $displayName;
 
             $style = StyleSampling::query()
                 ->where('description', 'like', '%'.self::MARKER.'%')
@@ -48,12 +53,8 @@ class AiSearchDangdutTestSeeder extends Seeder
                 ->first();
 
             if (! $style) {
-                $nameIsOwnedByOriginalData = StyleSampling::where('name', $testName)
-                    ->where(fn ($query) => $query->whereNull('description')->orWhere('description', 'not like', '%'.self::MARKER.'%'))
-                    ->exists();
-
                 $style = new StyleSampling([
-                    'name' => $nameIsOwnedByOriginalData ? '[TEST '.self::MARKER.'] '.$item['title'] : $testName,
+                    'name' => $catalogName,
                     'access' => $template->access,
                     'status' => 'Published',
                     'style_file_path' => $template->style_file_path,
@@ -61,7 +62,6 @@ class AiSearchDangdutTestSeeder extends Seeder
                     'preview_path' => $template->preview_path,
                     'cover_image_path' => $template->cover_image_path,
                     'cover_image_url' => $template->cover_image_url,
-                    'style_filename' => $template->style_filename,
                     'audio_filename' => $template->audio_filename,
                     'preview_filename' => $template->preview_filename,
                     'file_size' => $template->file_size,
@@ -72,8 +72,10 @@ class AiSearchDangdutTestSeeder extends Seeder
 
             $profile = $this->searchProfile($item['title'], $item['artist'], $item['genre']);
             $style->fill([
+                'name' => $catalogName,
                 'category' => $category,
                 'pack' => $pack,
+                'style_filename' => $this->styleFilename($catalogName),
                 'description' => $description,
                 'ai_song_title' => $item['title'],
                 'ai_artist' => $item['artist'],
@@ -151,6 +153,14 @@ class AiSearchDangdutTestSeeder extends Seeder
     private function searchProfile(string $title, string $artist, string $genre): string
     {
         return "{$title} oleh {$artist}. Katalog pengujian {$genre}. Digunakan untuk pengujian pencarian artis {$artist}, judul {$title}, musik Jawa, dangdut Jawa, dan Style Sampling.";
+    }
+
+    private function styleFilename(string $displayName): string
+    {
+        $filename = str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '-', $displayName);
+        $filename = trim(preg_replace('/\s+/u', ' ', $filename) ?? '', " .");
+
+        return ($filename !== '' ? $filename : 'HM Music Style').'.STY';
     }
 
     /** @return array<int, string> */

@@ -122,6 +122,30 @@ class HybridAiStyleSearchTest extends TestCase
         $this->assertSame(0, $this->intelligence->understandingCalls);
     }
 
+    public function test_artist_query_with_lagu_prefix_is_resolved_from_catalog_without_ai(): void
+    {
+        config()->set('services.ai_search.top_k', 12);
+
+        $original = $this->enrichedStyle('Sinarengan (Denny Caknan)', 'Denny Caknan', 'Sinarengan');
+        $dummyDuplicate = $this->enrichedStyle('Sinarengan - Denny Caknan', 'Denny Caknan', 'Sinarengan');
+        $dummyDuplicate->update(['ai_enrichment_source' => 'test_seed']);
+
+        foreach (range(1, 9) as $number) {
+            $this->enrichedStyle("Denny Style {$number}", 'Denny Caknan');
+        }
+        $this->enrichedStyle('Pamer Bojo', 'Didi Kempot');
+
+        $result = app(HybridStyleSearchService::class)->search('lagu denny caknan');
+
+        $this->assertCount(10, $result->styles);
+        $this->assertSame(['Denny Caknan'], $result->styles->pluck('ai_artist')->unique()->values()->all());
+        $this->assertSame('Catalog Artist Match', $result->styles->first()->ai_match_label);
+        $this->assertTrue($result->understanding['deterministic']);
+        $this->assertSame(0, $this->intelligence->understandingCalls);
+        $this->assertContains($original->id, $result->styles->pluck('id'));
+        $this->assertNotContains($dummyDuplicate->id, $result->styles->pluck('id'));
+    }
+
     public function test_lyric_identification_maps_identified_song_back_to_catalog(): void
     {
         $song = $this->enrichedStyle('Pamer Bojo Style', 'Didi Kempot', 'Pamer Bojo');
