@@ -72,9 +72,11 @@ trap deployment_failed EXIT
     --prefer-dist \
     --no-interaction \
     --no-progress \
+    --no-scripts \
     --optimize-autoloader
 
 "${COMPOSER[@]}" check-platform-reqs --no-dev
+"$PHP_BIN" artisan package:discover --ansi
 "$PHP_BIN" artisan migrate --force
 
 readonly BUILD_NEXT="$PUBLIC_ROOT/build_next"
