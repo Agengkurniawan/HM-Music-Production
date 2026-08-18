@@ -38,7 +38,7 @@ class StyleSamplingAccessTest extends TestCase
             ->get(route('stylesampling', ['type' => 'style']))
             ->assertOk()
             ->assertSee('HM Subscription Style')
-            ->assertSee('https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg', false)
+            ->assertSee(asset(StyleSampling::DEFAULT_COVER_PATHS['Dangdut']), false)
             ->assertSee('Unlock STY')
             ->assertSee('Subscription')
             ->assertDontSee('MP3 Preview')
@@ -60,5 +60,35 @@ class StyleSamplingAccessTest extends TestCase
             ->get(route('stylesampling.download.style', $style))
             ->assertOk()
             ->assertDownload('hm-subscription.sty');
+    }
+
+    public function test_cover_uses_category_fallback_without_overriding_explicit_cover(): void
+    {
+        foreach (StyleSampling::DEFAULT_COVER_PATHS as $category => $path) {
+            $style = new StyleSampling(['category' => $category]);
+
+            $this->assertFileExists(public_path($path));
+            $this->assertSame(asset($path), $style->cover_src);
+        }
+
+        $unknownCategory = new StyleSampling(['category' => 'Unknown']);
+        $this->assertSame(StyleSampling::DEFAULT_COVER_URL, $unknownCategory->cover_src);
+
+        $remoteCover = new StyleSampling([
+            'category' => 'Dangdut',
+            'cover_image_url' => 'https://example.test/custom-cover.jpg',
+        ]);
+        $this->assertSame('https://example.test/custom-cover.jpg', $remoteCover->cover_src);
+
+        Storage::fake('public');
+        $uploadedCover = new StyleSampling([
+            'category' => 'Campursari',
+            'cover_image_path' => 'styles/covers/custom-cover.jpg',
+            'cover_image_url' => 'https://example.test/ignored-cover.jpg',
+        ]);
+        $this->assertSame(
+            Storage::disk('public')->url('styles/covers/custom-cover.jpg'),
+            $uploadedCover->cover_src,
+        );
     }
 }

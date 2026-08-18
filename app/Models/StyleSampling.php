@@ -12,6 +12,14 @@ class StyleSampling extends Model
 
     public const CUSTOMER_STYLE_CATEGORIES = self::CATEGORIES;
 
+    public const DEFAULT_COVER_PATHS = [
+        'Gamelan' => 'img/style-defaults/gamelan.jpg',
+        'Dangdut' => 'img/style-defaults/dangdut.jpg',
+        'Campursari' => 'img/style-defaults/campursari.jpg',
+    ];
+
+    public const DEFAULT_COVER_URL = 'https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg';
+
     public const PACKS = [
         'HM Dangdut Expansion Packs',
         'HM Campursari Expansion Packs',
@@ -165,7 +173,13 @@ class StyleSampling extends Model
             return Storage::disk('public')->url($this->cover_image_path);
         }
 
-        return $this->cover_image_url ?: 'https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg';
+        if ($this->cover_image_url) {
+            return $this->cover_image_url;
+        }
+
+        $defaultCoverPath = self::DEFAULT_COVER_PATHS[$this->category] ?? null;
+
+        return $defaultCoverPath ? asset($defaultCoverPath) : self::DEFAULT_COVER_URL;
     }
 
     public function getDisplayAudioNameAttribute(): string

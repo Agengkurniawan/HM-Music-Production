@@ -25,6 +25,8 @@ class AiSearchDangdutTestSeederTest extends TestCase
             'status' => 'Published',
             'style_file_path' => 'styles/original-template.sty',
             'style_filename' => 'original-template.sty',
+            'cover_image_path' => 'styles/covers/original-template.jpg',
+            'cover_image_url' => 'https://example.test/original-template.jpg',
             'description' => 'Original data that must remain unchanged.',
             'downloads_count' => 77,
         ]);
@@ -33,6 +35,12 @@ class AiSearchDangdutTestSeederTest extends TestCase
     public function test_seeder_is_idempotent_preserves_original_and_creates_expected_catalog(): void
     {
         $this->seed(AiSearchDangdutTestSeeder::class);
+
+        $this->markedRows()->toQuery()->update([
+            'cover_image_path' => 'styles/covers/legacy-template.jpg',
+            'cover_image_url' => 'https://example.test/legacy-template.jpg',
+        ]);
+
         $this->seed(AiSearchDangdutTestSeeder::class);
 
         $testRows = $this->markedRows();
@@ -61,6 +69,11 @@ class AiSearchDangdutTestSeederTest extends TestCase
         ));
         $this->assertTrue($testRows->every(fn (StyleSampling $style): bool => ! str_contains($style->name, '[TEST]')));
         $this->assertTrue($testRows->every(
+            fn (StyleSampling $style): bool => $style->cover_image_path === null
+                && $style->cover_image_url === null
+                && $style->cover_src === asset(StyleSampling::DEFAULT_COVER_PATHS[$style->category])
+        ));
+        $this->assertTrue($testRows->every(
             fn (StyleSampling $style): bool => $style->style_filename === rtrim($style->name, ' .').'.STY'
                 && $style->style_filename !== 'Sinarengan.STY'
         ));
@@ -73,6 +86,8 @@ class AiSearchDangdutTestSeederTest extends TestCase
         $original = $this->template->refresh();
         $this->assertSame('Original Production Template', $original->name);
         $this->assertSame('Original data that must remain unchanged.', $original->description);
+        $this->assertSame('styles/covers/original-template.jpg', $original->cover_image_path);
+        $this->assertSame('https://example.test/original-template.jpg', $original->cover_image_url);
         $this->assertSame(77, $original->downloads_count);
     }
 
