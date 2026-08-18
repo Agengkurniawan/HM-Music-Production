@@ -58,7 +58,7 @@
                                 </figure>
                             @empty
                                 <figure class="hero-style hero-style--1">
-                                    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=720&h=480&fit=crop" alt="">
+                                    <img src="https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg" alt="">
                                     <figcaption>
                                         <strong>HM Music</strong>
                                         <span>Style Pack</span>

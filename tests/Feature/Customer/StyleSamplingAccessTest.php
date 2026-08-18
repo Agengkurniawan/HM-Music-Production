@@ -38,6 +38,7 @@ class StyleSamplingAccessTest extends TestCase
             ->get(route('stylesampling', ['type' => 'style']))
             ->assertOk()
             ->assertSee('HM Subscription Style')
+            ->assertSee('https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg', false)
             ->assertSee('Unlock STY')
             ->assertSee('Subscription')
             ->assertDontSee('MP3 Preview')

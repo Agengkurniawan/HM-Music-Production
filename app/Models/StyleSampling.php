@@ -165,7 +165,7 @@ class StyleSampling extends Model
             return Storage::disk('public')->url($this->cover_image_path);
         }
 
-        return $this->cover_image_url ?: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=720&h=480&fit=crop';
+        return $this->cover_image_url ?: 'https://hmmusicproduction.com/storage/styles/covers/RhserqWvSwyjvlFNyk6TJIPI95z5YyALFsBBQDsz.jpg';
     }
 
     public function getDisplayAudioNameAttribute(): string
